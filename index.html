@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Suppress harmless Vite HMR WebSocket connection logs in iframe preview
+      (function () {
+        function shouldSuppress(msg) {
+          return (
+            typeof msg === 'string' &&
+            (msg.includes('createWebSocketModuleRunnerTransport') ||
+              msg.includes('@vite/client') ||
+              msg.includes('WebSocket connection to') ||
+              msg.includes('WebSocket'))
+          );
+        }
+        const origConsoleError = console.error;
+        console.error = function (...args) {
+          if (args.some((a) => shouldSuppress(a && (a.message || a.stack || String(a))))) {
+            return;
+          }
+          origConsoleError.apply(console, args);
+        };
+        window.addEventListener(
+          'error',
+          function (e) {
+            if (
+              shouldSuppress(e.message) ||
+              shouldSuppress(e.filename) ||
+              (e.error && shouldSuppress(e.error.stack || e.error.message))
+            ) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              return true;
+            }
+          },
+          true
+        );
+        window.addEventListener(
+          'unhandledrejection',
+          function (e) {
+            if (
+              e.reason &&
+              shouldSuppress(String(e.reason.stack || e.reason.message || e.reason))
+            ) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }
+          },
+          true
+        );
+      })();
+    </script>
+    <title>InvoicePilot - AI Collections Agent for Freelancers</title>
+    <meta name="description" content="AI collections agent for freelancers and small businesses - extract invoices from client messages, approve and send via PayPal Sandbox, and track payments." />
+    <meta property="og:title" content="InvoicePilot - AI Collections Agent for Freelancers" />
+    <meta property="og:description" content="AI collections agent for freelancers and small businesses - extract invoices from client messages, approve and send via PayPal Sandbox, and track payments." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

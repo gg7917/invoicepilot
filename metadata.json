@@ -1,0 +1,6 @@
+{
+  "name": "InvoicePilot",
+  "description": "AI collections agent for freelancers and small businesses - extract invoices from client messages, approve and send via PayPal Sandbox, and track payments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

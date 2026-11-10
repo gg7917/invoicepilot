@@ -1,0 +1,432 @@
+{
+  "invoices": [
+    {
+      "clientName": "Sarah Jenkins Design",
+      "clientEmail": "sarah.j@example.com",
+      "description": "Brand identity and logo package",
+      "lineItems": [
+        {
+          "id": "item-1",
+          "name": "Logo Design Concepts",
+          "quantity": 2,
+          "unitPrice": 150,
+          "total": 300
+        },
+        {
+          "id": "item-2",
+          "name": "Social Banner",
+          "quantity": 1,
+          "unitPrice": 75,
+          "total": 75
+        }
+      ],
+      "amount": 375,
+      "currency": "USD",
+      "issueDate": "2026-11-09",
+      "dueDate": "2026-11-20",
+      "status": "Sent",
+      "notes": "Thanks for working with us!",
+      "rawClientMessage": "",
+      "id": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "createdAt": "2026-11-09T13:27:40.486Z",
+      "updatedAt": "2026-11-09T14:16:41.914Z",
+      "paypalInvoiceId": "INV2-QAC8-RQG6-E2DC-ZG6Q",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#QAC8RQG6E2DCZG6Q",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-QAC8-RQG6-E2DC-ZG6Q",
+      "rawPayPalStatus": "SENT"
+    },
+    {
+      "clientName": "Ravi",
+      "clientEmail": "ravi@example.com",
+      "description": "3 Logo Designs and a Banner",
+      "lineItems": [
+        {
+          "id": "item-1794208849547-0",
+          "name": "Logo Designs",
+          "description": "3 logo designs",
+          "quantity": 3,
+          "unitPrice": 100,
+          "total": 300
+        },
+        {
+          "id": "item-1794208849547-1",
+          "name": "Banner Design",
+          "description": "1 banner design",
+          "quantity": 1,
+          "unitPrice": 100,
+          "total": 100
+        }
+      ],
+      "amount": 400,
+      "currency": "USD",
+      "issueDate": "2026-11-09",
+      "dueDate": "2026-11-19",
+      "status": "Draft",
+      "notes": "Due in 10 days",
+      "rawClientMessage": "Hi, I need 3 logo designs and a banner, $400 total. Please send the invoice, due in 10 days. - Ravi (ravi@example.com)",
+      "id": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "createdAt": "2026-11-09T07:30:58.101Z",
+      "updatedAt": "2026-11-09T14:16:43.269Z",
+      "paypalInvoiceId": "INV2-9N4L-G8J9-K3XG-VCRD",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#9N4LG8J9K3XGVCRD",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-9N4L-G8J9-K3XG-VCRD",
+      "rawPayPalStatus": "DRAFT"
+    },
+    {
+      "id": "inv-1001",
+      "invoiceNumber": "INV-2026-001",
+      "clientName": "Apex Creative Labs (Ravi Sharma)",
+      "clientEmail": "ravi@apexcreative.io",
+      "description": "Brand Identity & 3 Logo Concepts + Social Media Banner Kit",
+      "amount": 400,
+      "currency": "USD",
+      "issueDate": "2026-11-08",
+      "dueDate": "2026-11-18",
+      "status": "Draft",
+      "rawClientMessage": "Hi, I need 3 logo designs and a banner, $400 total, can you send the invoice, due in 10 days. - Ravi (ravi@apexcreative.io)",
+      "notes": "Payment terms: Due in 10 days via PayPal Sandbox. Final vector SVG & PNG delivered upon payment approval.",
+      "lineItems": [
+        {
+          "id": "li-1",
+          "name": "Brand Identity & Logo Concepts",
+          "description": "3 custom vector logo proposals with monochrome & full color variants",
+          "quantity": 3,
+          "unitPrice": 100,
+          "total": 300
+        },
+        {
+          "id": "li-2",
+          "name": "Social Media Banner Kit",
+          "description": "High-res banners formatted for Twitter/X, LinkedIn, and YouTube",
+          "quantity": 1,
+          "unitPrice": 100,
+          "total": 100
+        }
+      ],
+      "createdAt": "2026-11-08T09:15:00.000Z",
+      "updatedAt": "2026-11-08T09:15:00.000Z"
+    },
+    {
+      "id": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "clientName": "CloudScale Systems (Sarah Jenkins)",
+      "clientEmail": "sarah.j@cloudscale.net",
+      "description": "Full-Stack API Integration & Microservices Security Audit (40 hrs)",
+      "amount": 3200,
+      "currency": "USD",
+      "issueDate": "2026-10-22",
+      "dueDate": "2026-11-05",
+      "status": "Overdue",
+      "rawClientMessage": "Please invoice for sprint 4 microservices audit 40 hrs at $80/hr. Thanks Sarah.",
+      "notes": "Overdue since November 5th. Reminder notification pending collections sequence.",
+      "lineItems": [
+        {
+          "id": "li-3",
+          "name": "Backend API Audit & Performance Profiling",
+          "description": "40 billable engineering hours on distributed cache & auth gateway",
+          "quantity": 40,
+          "unitPrice": 80,
+          "total": 3200
+        }
+      ],
+      "createdAt": "2026-10-22T14:30:00.000Z",
+      "updatedAt": "2026-11-06T00:00:00.000Z"
+    },
+    {
+      "id": "inv-1003",
+      "invoiceNumber": "INV-2026-003",
+      "clientName": "Nordic Wellness Co. (Elin Larsson)",
+      "clientEmail": "finance@nordicwellness.se",
+      "description": "E-commerce Shopify Theme Customization & Mobile Checkout UX",
+      "amount": 1450,
+      "currency": "USD",
+      "issueDate": "2026-11-02",
+      "dueDate": "2026-11-20",
+      "status": "Sent",
+      "rawClientMessage": "Invoice for mobile checkout optimization ($1,450) with net 18 terms. Send to Elin Larsson.",
+      "notes": "Ready for PayPal Sandbox Invoicing API dispatch.",
+      "lineItems": [
+        {
+          "id": "li-4",
+          "name": "Shopify Liquid Frontend Customization",
+          "description": "Responsive cart drawer, speed optimization, and upsell modules",
+          "quantity": 1,
+          "unitPrice": 1450,
+          "total": 1450
+        }
+      ],
+      "createdAt": "2026-11-02T11:00:00.000Z",
+      "updatedAt": "2026-11-02T11:05:00.000Z"
+    },
+    {
+      "id": "inv-1004",
+      "invoiceNumber": "INV-2026-004",
+      "clientName": "Vanguard Legal Tech (Marcus Vance)",
+      "clientEmail": "mvance@vanguardtech.co",
+      "description": "UI/UX Dashboard Prototyping & Design System in Figma",
+      "amount": 850,
+      "currency": "USD",
+      "issueDate": "2026-10-14",
+      "dueDate": "2026-10-28",
+      "status": "Paid",
+      "rawClientMessage": "Marcus here from Vanguard. Send the $850 Figma prototype invoice due in two weeks.",
+      "notes": "Paid in full on October 27, 2026.",
+      "lineItems": [
+        {
+          "id": "li-5",
+          "name": "Figma Interactive Component Library & 10 UI Screens",
+          "description": "Dark-mode compliant attorney review workstation designs",
+          "quantity": 1,
+          "unitPrice": 850,
+          "total": 850
+        }
+      ],
+      "createdAt": "2026-10-14T10:00:00.000Z",
+      "updatedAt": "2026-10-27T16:20:00.000Z"
+    },
+    {
+      "id": "inv-1005",
+      "invoiceNumber": "INV-2026-005",
+      "clientName": "Brightline Digital (Priya Patel)",
+      "clientEmail": "priya@brightline.agency",
+      "description": "Monthly Fractional Frontend Engineering Retainer (October 2026)",
+      "amount": 2000,
+      "currency": "USD",
+      "issueDate": "2026-10-01",
+      "dueDate": "2026-10-31",
+      "status": "Paid",
+      "rawClientMessage": "Hi! Billing for October monthly engineering retainer $2,000 as agreed. Priya.",
+      "notes": "Recurring retainer payment confirmed on October 30, 2026.",
+      "lineItems": [
+        {
+          "id": "li-6",
+          "name": "Fractional Senior React / TypeScript Support",
+          "description": "Monthly architecture advisory, PR reviews, and critical bug fixes",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "total": 2000
+        }
+      ],
+      "createdAt": "2026-10-01T08:00:00.000Z",
+      "updatedAt": "2026-10-30T17:45:00.000Z"
+    }
+  ],
+  "activityLogs": [
+    {
+      "invoiceId": "inv-1794233823387-dcv3h",
+      "invoiceNumber": "INV-2026-008",
+      "action": "deleted",
+      "description": "Invoice INV-2026-008 for Error Test Client was deleted.",
+      "id": "act-1794233826208-4zof4",
+      "timestamp": "2026-11-09T14:17:06.208Z"
+    },
+    {
+      "invoiceId": "inv-1794233823387-dcv3h",
+      "invoiceNumber": "INV-2026-008",
+      "action": "edited",
+      "description": "Invoice INV-2026-008 updated. Status: Draft",
+      "id": "act-1794233824784-5b5zc",
+      "timestamp": "2026-11-09T14:17:04.784Z"
+    },
+    {
+      "invoiceId": "inv-1794233823387-dcv3h",
+      "invoiceNumber": "INV-2026-008",
+      "action": "edited",
+      "description": "Invoice INV-2026-008 updated. Status: Draft",
+      "id": "act-1794233824104-hmtx2",
+      "timestamp": "2026-11-09T14:17:04.104Z"
+    },
+    {
+      "invoiceId": "inv-1794233823387-dcv3h",
+      "invoiceNumber": "INV-2026-008",
+      "action": "edited",
+      "description": "Invoice INV-2026-008 updated. Status: Draft",
+      "id": "act-1794233823394-sz0mj",
+      "timestamp": "2026-11-09T14:17:03.394Z"
+    },
+    {
+      "invoiceId": "inv-1794233823387-dcv3h",
+      "invoiceNumber": "INV-2026-008",
+      "action": "created",
+      "description": "Invoice INV-2026-008 created for Error Test Client ($100.00)",
+      "id": "act-1794233823387-7fi03",
+      "timestamp": "2026-11-09T14:17:03.387Z"
+    },
+    {
+      "invoiceId": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "action": "status_checked",
+      "description": "PayPal Sandbox status sync: Updated from Sent to Draft (DRAFT)",
+      "metadata": {
+        "paypalInvoiceId": "INV2-9N4L-G8J9-K3XG-VCRD",
+        "rawPayPalStatus": "DRAFT"
+      },
+      "id": "act-1794233803270-358mg",
+      "timestamp": "2026-11-09T14:16:43.270Z"
+    },
+    {
+      "invoiceId": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "action": "edited",
+      "description": "Invoice INV-2026-006 updated. Status: Draft",
+      "id": "act-1794233803269-nfazn",
+      "timestamp": "2026-11-09T14:16:43.269Z"
+    },
+    {
+      "invoiceId": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "action": "edited",
+      "description": "Invoice INV-2026-006 updated. Status: Sent",
+      "id": "act-1794233801915-06zgv",
+      "timestamp": "2026-11-09T14:16:41.915Z"
+    },
+    {
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "action": "edited",
+      "description": "Invoice INV-2026-012 updated. Status: Sent",
+      "id": "act-1794233801914-9f0i2",
+      "timestamp": "2026-11-09T14:16:41.914Z"
+    },
+    {
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "action": "sent",
+      "description": "Dispatched live via PayPal Sandbox API. Invoice ID: INV2-QAC8-RQG6-E2DC-ZG6Q (Invoice: INV-2026-012)",
+      "metadata": {
+        "paypalInvoiceId": "INV2-QAC8-RQG6-E2DC-ZG6Q",
+        "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#QAC8RQG6E2DCZG6Q",
+        "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-QAC8-RQG6-E2DC-ZG6Q",
+        "isSimulated": false
+      },
+      "id": "act-1794230866258-b4e5p",
+      "timestamp": "2026-11-09T13:27:46.258Z"
+    },
+    {
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "action": "edited",
+      "description": "Invoice INV-2026-012 updated. Status: Sent",
+      "id": "act-1794230866258-9tret",
+      "timestamp": "2026-11-09T13:27:46.258Z"
+    },
+    {
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-007",
+      "action": "approved",
+      "description": "User approved invoice INV-2026-007 for $375.00 to Sarah Jenkins Design",
+      "id": "act-1794230860507-4xi9v",
+      "timestamp": "2026-11-09T13:27:40.507Z"
+    },
+    {
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-007",
+      "action": "created",
+      "description": "Invoice INV-2026-007 created for Sarah Jenkins Design ($375.00)",
+      "id": "act-1794230860486-zg3f4",
+      "timestamp": "2026-11-09T13:27:40.486Z"
+    },
+    {
+      "invoiceId": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "action": "sent",
+      "description": "Dispatched live via PayPal Sandbox API. Invoice ID: undefined",
+      "metadata": {
+        "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#undefined",
+        "isSimulated": false
+      },
+      "id": "act-1794209460101-v05bs",
+      "timestamp": "2026-11-09T07:31:00.101Z"
+    },
+    {
+      "invoiceId": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "action": "edited",
+      "description": "Invoice INV-2026-006 updated. Status: Sent",
+      "id": "act-1794209460100-isb8o",
+      "timestamp": "2026-11-09T07:31:00.100Z"
+    },
+    {
+      "invoiceId": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "action": "approved",
+      "description": "User approved invoice INV-2026-006 for $400.00 to Ravi",
+      "id": "act-1794209458174-79hk7",
+      "timestamp": "2026-11-09T07:30:58.174Z"
+    },
+    {
+      "invoiceId": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "action": "created",
+      "description": "Invoice INV-2026-006 created for Ravi ($400.00)",
+      "id": "act-1794209458101-s3a9s",
+      "timestamp": "2026-11-09T07:30:58.101Z"
+    },
+    {
+      "id": "act-1",
+      "invoiceId": "inv-1001",
+      "invoiceNumber": "INV-2026-001",
+      "action": "created",
+      "description": "Draft invoice extracted from Ravi Sharma message via Gemini AI",
+      "timestamp": "2026-11-08T09:15:00.000Z"
+    },
+    {
+      "id": "act-2",
+      "invoiceId": "inv-1003",
+      "invoiceNumber": "INV-2026-003",
+      "action": "created",
+      "description": "Extracted invoice from client email message via Gemini AI",
+      "timestamp": "2026-11-02T11:00:00.000Z"
+    },
+    {
+      "id": "act-3",
+      "invoiceId": "inv-1003",
+      "invoiceNumber": "INV-2026-003",
+      "action": "approved",
+      "description": "User reviewed and approved invoice details for $1,450.00",
+      "timestamp": "2026-11-02T11:04:30.000Z"
+    },
+    {
+      "id": "act-4",
+      "invoiceId": "inv-1003",
+      "invoiceNumber": "INV-2026-003",
+      "action": "sent",
+      "description": "Dispatched invoice via PayPal Invoicing API Sandbox (ID: INV2-NW-3319-SANDBOX)",
+      "timestamp": "2026-11-02T11:05:00.000Z"
+    },
+    {
+      "id": "act-5",
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "sent",
+      "description": "Invoice dispatched to sarah.j@cloudscale.net via PayPal Sandbox",
+      "timestamp": "2026-10-22T14:35:00.000Z"
+    },
+    {
+      "id": "act-6",
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "status_checked",
+      "description": "Invoice due date (2026-11-05) lapsed without payment; marked as Overdue",
+      "timestamp": "2026-11-06T00:00:00.000Z"
+    },
+    {
+      "id": "act-7",
+      "invoiceId": "inv-1004",
+      "invoiceNumber": "INV-2026-004",
+      "action": "paid",
+      "description": "Payment of $850.00 confirmed on PayPal Sandbox for Marcus Vance",
+      "timestamp": "2026-10-27T16:20:00.000Z"
+    },
+    {
+      "id": "act-8",
+      "invoiceId": "inv-1005",
+      "invoiceNumber": "INV-2026-005",
+      "action": "paid",
+      "description": "Payment of $2,000.00 received for October Retainer",
+      "timestamp": "2026-10-30T17:45:00.000Z"
+    }
+  ]
+}
