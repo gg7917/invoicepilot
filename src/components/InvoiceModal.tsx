@@ -11,6 +11,8 @@ import {
   Mail,
   User,
   History,
+  MessageSquare,
+  Split,
 } from 'lucide-react';
 import { Invoice, ActivityLogEntry } from '../../types/invoice';
 
@@ -21,6 +23,8 @@ interface InvoiceModalProps {
   onClose: () => void;
   onMarkPaid: (id: string) => void;
   onApproveAndSend: (invoice: Invoice) => void;
+  onDraftReminder?: (invoice: Invoice) => void;
+  onClientReply?: (invoice: Invoice) => void;
 }
 
 export const InvoiceModal: React.FC<InvoiceModalProps> = ({
@@ -30,6 +34,8 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   onClose,
   onMarkPaid,
   onApproveAndSend,
+  onDraftReminder,
+  onClientReply,
 }) => {
   if (!isOpen || !invoice) return null;
 
@@ -295,6 +301,45 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             )}
           </div>
 
+          {/* Negotiated Terms or Installments (if any) */}
+          {invoice.installments && invoice.installments.length > 0 && (
+            <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/50 space-y-2">
+              <span className="text-xs font-semibold text-purple-900 uppercase tracking-wider flex items-center">
+                <Split className="w-3.5 h-3.5 mr-1.5 text-purple-600" />
+                Approved Payment Split Schedule ({invoice.installments.length} Installments)
+              </span>
+              <div className="space-y-1.5 pt-1">
+                {invoice.installments.map((inst, i) => (
+                  <div
+                    key={i}
+                    className="p-2.5 bg-white rounded-lg border border-purple-100 flex items-center justify-between text-xs"
+                  >
+                    <span className="font-medium text-slate-800">{inst.label}</span>
+                    <div className="space-x-3 text-right">
+                      <span className="font-bold text-slate-900">${inst.amount.toFixed(2)} USD</span>
+                      <span className="text-slate-500 font-mono text-[11px]">Due {inst.dueDate}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reminder History info */}
+          {invoice.remindersCount ? (
+            <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-800 flex items-center justify-between">
+              <span className="flex items-center font-medium">
+                <Mail className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
+                {invoice.remindersCount} overdue reminder{invoice.remindersCount === 1 ? '' : 's'} sent
+              </span>
+              {invoice.lastReminderSentAt && (
+                <span className="text-[11px] text-amber-700">
+                  Last sent: {new Date(invoice.lastReminderSentAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          ) : null}
+
           {/* Raw Message (if available) */}
           {invoice.rawClientMessage && (
             <div className="space-y-1.5">
@@ -344,17 +389,43 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-          <div>
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {invoice.status === 'Draft' && (
               <button
                 onClick={() => {
                   onClose();
                   onApproveAndSend(invoice);
                 }}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-xs transition-colors flex items-center"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors flex items-center"
               >
                 Approve &amp; Send via PayPal
+              </button>
+            )}
+
+            {(invoice.status === 'Sent' || invoice.status === 'Overdue') && onDraftReminder && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onDraftReminder(invoice);
+                }}
+                className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-semibold shadow-2xs transition-colors flex items-center"
+              >
+                <Mail className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
+                Draft Reminder
+              </button>
+            )}
+
+            {onClientReply && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onClientReply(invoice);
+                }}
+                className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 rounded-xl text-xs font-semibold shadow-2xs transition-colors flex items-center"
+              >
+                <MessageSquare className="w-3.5 h-3.5 mr-1.5 text-purple-600" />
+                Paste Client Reply
               </button>
             )}
 
@@ -374,7 +445,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors"
+            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-medium hover:bg-slate-100 transition-colors"
           >
             Close
           </button>
@@ -383,3 +454,4 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
     </div>
   );
 };
+

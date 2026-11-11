@@ -84,7 +84,7 @@
       "currency": "USD",
       "issueDate": "2026-11-08",
       "dueDate": "2026-11-18",
-      "status": "Draft",
+      "status": "Paid",
       "rawClientMessage": "Hi, I need 3 logo designs and a banner, $400 total, can you send the invoice, due in 10 days. - Ravi (ravi@apexcreative.io)",
       "notes": "Payment terms: Due in 10 days via PayPal Sandbox. Final vector SVG & PNG delivered upon payment approval.",
       "lineItems": [
@@ -106,7 +106,11 @@
         }
       ],
       "createdAt": "2026-11-08T09:15:00.000Z",
-      "updatedAt": "2026-11-08T09:15:00.000Z"
+      "updatedAt": "2026-11-11T04:13:00.462Z",
+      "paypalInvoiceId": "INV2-M2EB-VXE6-XJZM-EY5J",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#M2EBVXE6XJZMEY5J",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-M2EB-VXE6-XJZM-EY5J",
+      "rawPayPalStatus": "PAID"
     },
     {
       "id": "inv-1002",
@@ -132,7 +136,9 @@
         }
       ],
       "createdAt": "2026-10-22T14:30:00.000Z",
-      "updatedAt": "2026-11-06T00:00:00.000Z"
+      "updatedAt": "2026-11-10T14:16:46.478Z",
+      "lastReminderSentAt": "2026-11-10T14:16:46.476Z",
+      "remindersCount": 1
     },
     {
       "id": "inv-1003",
@@ -211,9 +217,394 @@
       ],
       "createdAt": "2026-10-01T08:00:00.000Z",
       "updatedAt": "2026-10-30T17:45:00.000Z"
+    },
+    {
+      "id": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "clientName": "[Demo] Horizon Studio (Liam Chen)",
+      "clientEmail": "liam@horizonstudio.design",
+      "description": "Website Landing Page & Interactive Motion Graphics",
+      "amount": 650,
+      "currency": "USD",
+      "issueDate": "2026-10-23",
+      "dueDate": "2026-11-06",
+      "status": "Overdue",
+      "isDemo": true,
+      "rawClientMessage": "Hi Liam, sending over the agreed landing page work invoice ($650). Due Nov 6.",
+      "notes": "[Demo Data] 4 days overdue. Ideal for testing friendly reminder generation (1-7 days overdue).",
+      "lineItems": [
+        {
+          "id": "li-demo-1",
+          "name": "Landing Page Responsive UI",
+          "description": "Figma to React conversion with smooth interactions",
+          "quantity": 1,
+          "unitPrice": 450,
+          "total": 450
+        },
+        {
+          "id": "li-demo-2",
+          "name": "Motion Graphics Asset Pack",
+          "description": "Lottie animations for hero illustration",
+          "quantity": 1,
+          "unitPrice": 200,
+          "total": 200
+        }
+      ],
+      "createdAt": "2026-10-23T10:00:00.000Z",
+      "updatedAt": "2026-11-10T14:16:28.767Z",
+      "lastReminderSentAt": "2026-11-10T14:16:28.767Z",
+      "remindersCount": 1
+    },
+    {
+      "id": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "clientName": "[Demo] Quantum Labs (Dr. Aris Thorne)",
+      "clientEmail": "aris@quantumlabs.ai",
+      "description": "Data Pipeline Automation & Real-Time Dashboard Integration",
+      "amount": 1850,
+      "currency": "USD",
+      "issueDate": "2026-10-14",
+      "dueDate": "2026-10-28",
+      "status": "Overdue",
+      "isDemo": true,
+      "rawClientMessage": "Billing for Python telemetry pipeline and WebSocket dashboard: $1,850. Due Oct 28.",
+      "notes": "[Demo Data] 13 days overdue. Ideal for testing firmer reminder tone and client reply negotiations.",
+      "lineItems": [
+        {
+          "id": "li-demo-3",
+          "name": "ETL Pipeline & Kafka Integration",
+          "description": "High-throughput stream processing setup",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "total": 1200
+        },
+        {
+          "id": "li-demo-4",
+          "name": "WebSocket Live Telemetry UI",
+          "description": "Real-time charts and KPI indicators",
+          "quantity": 1,
+          "unitPrice": 650,
+          "total": 650
+        }
+      ],
+      "createdAt": "2026-10-14T11:30:00.000Z",
+      "updatedAt": "2026-11-10T14:16:46.476Z",
+      "lastReminderSentAt": "2026-11-10T14:16:46.476Z",
+      "remindersCount": 1
+    },
+    {
+      "id": "demo-overdue-3",
+      "invoiceNumber": "INV-2026-DEMO3",
+      "clientName": "[Demo] Nexus Media Partners (Elena Rostova)",
+      "clientEmail": "billing@nexusmedia.agency",
+      "description": "Q3 Brand Strategy & Video Post-Production Campaign",
+      "amount": 3400,
+      "currency": "USD",
+      "issueDate": "2026-09-30",
+      "dueDate": "2026-10-15",
+      "status": "Overdue",
+      "isDemo": true,
+      "rawClientMessage": "Deliverable complete for video post-production retainer: $3,400. Due Oct 15.",
+      "notes": "[Demo Data] 26 days overdue. Ideal for testing final collection notice generation.",
+      "lineItems": [
+        {
+          "id": "li-demo-5",
+          "name": "Brand Campaign Video Editing & Color Grading",
+          "description": "4 video cuts for YouTube and paid ads",
+          "quantity": 1,
+          "unitPrice": 2200,
+          "total": 2200
+        },
+        {
+          "id": "li-demo-6",
+          "name": "Sound Design & Audio Mastering",
+          "description": "Custom Foley and voiceover mixing in 5.1",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "total": 1200
+        }
+      ],
+      "createdAt": "2026-09-30T09:00:00.000Z",
+      "updatedAt": "2026-10-16T00:00:00.000Z"
     }
   ],
   "activityLogs": [
+    {
+      "invoiceId": "inv-1001",
+      "invoiceNumber": "INV-2026-001",
+      "action": "paid",
+      "description": "Payment received: Invoice INV-2026-001 ($400.00 USD) from Apex Creative Labs (Ravi Sharma) confirmed via PayPal Sandbox.",
+      "metadata": {
+        "paypalInvoiceId": "INV2-M2EB-VXE6-XJZM-EY5J",
+        "rawPayPalStatus": "PAID",
+        "amount": 400
+      },
+      "id": "act-1794370380463-htri0",
+      "timestamp": "2026-11-11T04:13:00.463Z"
+    },
+    {
+      "invoiceId": "inv-1001",
+      "invoiceNumber": "INV-2026-001",
+      "action": "edited",
+      "description": "Invoice INV-2026-001 updated. Status: Paid",
+      "id": "act-1794370380462-p1akc",
+      "timestamp": "2026-11-11T04:13:00.462Z"
+    },
+    {
+      "invoiceId": "inv-1001",
+      "invoiceNumber": "INV-2026-001",
+      "action": "edited",
+      "description": "Invoice INV-2026-001 updated. Status: Draft",
+      "id": "act-1794370379804-beqow",
+      "timestamp": "2026-11-11T04:12:59.804Z"
+    },
+    {
+      "action": "agent_scan",
+      "description": "Collections agent scanned 10 invoices: drafted 4 reminder(s) for approval.",
+      "metadata": {
+        "scannedCount": 10,
+        "overdueCount": 4,
+        "newDraftsCount": 4,
+        "alreadyDraftedCount": 0,
+        "totalPending": 4
+      },
+      "id": "act-1794320220137-bktdr",
+      "timestamp": "2026-11-10T14:17:00.137Z"
+    },
+    {
+      "invoiceId": "demo-overdue-3",
+      "invoiceNumber": "INV-2026-DEMO3",
+      "action": "reminder_drafted",
+      "description": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 26,
+        "tone": "final",
+        "subject": "FINAL NOTICE: Immediate payment required for Invoice INV-2026-DEMO3 ($3400.00)",
+        "draftId": "draft-demo-overdue-3-1794320220136",
+        "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder"
+      },
+      "id": "act-1794320220137-ei7hf",
+      "timestamp": "2026-11-10T14:17:00.137Z"
+    },
+    {
+      "invoiceId": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "action": "reminder_drafted",
+      "description": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 13,
+        "tone": "firm",
+        "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
+        "draftId": "draft-demo-overdue-2-1794320219840",
+        "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder"
+      },
+      "id": "act-1794320219841-bgylj",
+      "timestamp": "2026-11-10T14:16:59.841Z"
+    },
+    {
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "reminder_drafted",
+      "description": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 5,
+        "tone": "friendly",
+        "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
+        "draftId": "draft-inv-1002-1794320219528",
+        "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder"
+      },
+      "id": "act-1794320219528-qebho",
+      "timestamp": "2026-11-10T14:16:59.528Z"
+    },
+    {
+      "invoiceId": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "action": "reminder_drafted",
+      "description": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 4,
+        "tone": "friendly",
+        "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
+        "draftId": "draft-demo-overdue-1-1794320219226",
+        "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder"
+      },
+      "id": "act-1794320219226-m622k",
+      "timestamp": "2026-11-10T14:16:59.226Z"
+    },
+    {
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "reminder_sent",
+      "description": "User batch-approved and sent friendly reminder for Invoice INV-2026-002 to sarah.j@cloudscale.net",
+      "metadata": {
+        "draftId": "draft-inv-1002-1794320155701",
+        "recipient": "sarah.j@cloudscale.net",
+        "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
+        "tone": "friendly",
+        "batch": true
+      },
+      "id": "act-1794320206480-z2t27",
+      "timestamp": "2026-11-10T14:16:46.480Z"
+    },
+    {
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "edited",
+      "description": "Invoice INV-2026-002 updated. Status: Overdue",
+      "id": "act-1794320206478-ab4na",
+      "timestamp": "2026-11-10T14:16:46.478Z"
+    },
+    {
+      "invoiceId": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "action": "reminder_sent",
+      "description": "User batch-approved and sent firm reminder for Invoice INV-2026-DEMO2 to aris@quantumlabs.ai",
+      "metadata": {
+        "draftId": "draft-demo-overdue-2-1794320156024",
+        "recipient": "aris@quantumlabs.ai",
+        "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
+        "tone": "firm",
+        "batch": true
+      },
+      "id": "act-1794320206478-3sg03",
+      "timestamp": "2026-11-10T14:16:46.478Z"
+    },
+    {
+      "invoiceId": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "action": "edited",
+      "description": "Invoice INV-2026-DEMO2 updated. Status: Overdue",
+      "id": "act-1794320206476-olods",
+      "timestamp": "2026-11-10T14:16:46.476Z"
+    },
+    {
+      "invoiceId": "demo-overdue-3",
+      "invoiceNumber": "INV-2026-DEMO3",
+      "action": "reminder_rejected",
+      "description": "User dismissed reminder draft for Invoice INV-2026-DEMO3 ([Demo] Nexus Media Partners (Elena Rostova))",
+      "metadata": {
+        "draftId": "draft-demo-overdue-3-1794320156330",
+        "reason": "Customer promised payment tomorrow"
+      },
+      "id": "act-1794320199857-ylt91",
+      "timestamp": "2026-11-10T14:16:39.857Z"
+    },
+    {
+      "invoiceId": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "action": "reminder_sent",
+      "description": "User approved and sent friendly reminder for Invoice INV-2026-DEMO1 to liam@horizonstudio.design",
+      "metadata": {
+        "draftId": "draft-demo-overdue-1-1794320155435",
+        "recipient": "liam@horizonstudio.design",
+        "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
+        "tone": "friendly"
+      },
+      "id": "act-1794320188768-jvrm6",
+      "timestamp": "2026-11-10T14:16:28.768Z"
+    },
+    {
+      "invoiceId": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "action": "edited",
+      "description": "Invoice INV-2026-DEMO1 updated. Status: Overdue",
+      "id": "act-1794320188767-g7w1p",
+      "timestamp": "2026-11-10T14:16:28.767Z"
+    },
+    {
+      "action": "agent_scan",
+      "description": "Collections agent scanned 10 invoices: 4 overdue invoice(s) already have pending drafts in the approval queue.",
+      "metadata": {
+        "scannedCount": 10,
+        "overdueCount": 4,
+        "newDraftsCount": 0,
+        "alreadyDraftedCount": 4,
+        "totalPending": 4
+      },
+      "id": "act-1794320161311-g5111",
+      "timestamp": "2026-11-10T14:16:01.311Z"
+    },
+    {
+      "action": "agent_scan",
+      "description": "Collections agent scanned 10 invoices: drafted 4 reminder(s) for approval.",
+      "metadata": {
+        "scannedCount": 10,
+        "overdueCount": 4,
+        "newDraftsCount": 4,
+        "alreadyDraftedCount": 0,
+        "totalPending": 4
+      },
+      "id": "act-1794320156331-2gp2b",
+      "timestamp": "2026-11-10T14:15:56.331Z"
+    },
+    {
+      "invoiceId": "demo-overdue-3",
+      "invoiceNumber": "INV-2026-DEMO3",
+      "action": "reminder_drafted",
+      "description": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 26,
+        "tone": "final",
+        "subject": "FINAL NOTICE: Immediate payment required for Invoice INV-2026-DEMO3 ($3400.00)",
+        "draftId": "draft-demo-overdue-3-1794320156330",
+        "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder"
+      },
+      "id": "act-1794320156331-rv106",
+      "timestamp": "2026-11-10T14:15:56.331Z"
+    },
+    {
+      "invoiceId": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "action": "reminder_drafted",
+      "description": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 13,
+        "tone": "firm",
+        "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
+        "draftId": "draft-demo-overdue-2-1794320156024",
+        "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder"
+      },
+      "id": "act-1794320156024-k7lyo",
+      "timestamp": "2026-11-10T14:15:56.024Z"
+    },
+    {
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "reminder_drafted",
+      "description": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 5,
+        "tone": "friendly",
+        "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
+        "draftId": "draft-inv-1002-1794320155701",
+        "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder"
+      },
+      "id": "act-1794320155702-fd59h",
+      "timestamp": "2026-11-10T14:15:55.702Z"
+    },
+    {
+      "invoiceId": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "action": "reminder_drafted",
+      "description": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
+      "metadata": {
+        "agentRun": true,
+        "daysOverdue": 4,
+        "tone": "friendly",
+        "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
+        "draftId": "draft-demo-overdue-1-1794320155435",
+        "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder"
+      },
+      "id": "act-1794320155436-hcxxc",
+      "timestamp": "2026-11-10T14:15:55.436Z"
+    },
     {
       "invoiceId": "inv-1794233823387-dcv3h",
       "invoiceNumber": "INV-2026-008",
@@ -427,6 +818,164 @@
       "action": "paid",
       "description": "Payment of $2,000.00 received for October Retainer",
       "timestamp": "2026-10-30T17:45:00.000Z"
+    }
+  ],
+  "approvalQueue": [
+    {
+      "id": "draft-demo-overdue-3-1794320220136",
+      "invoiceId": "demo-overdue-3",
+      "invoiceNumber": "INV-2026-DEMO3",
+      "clientName": "[Demo] Nexus Media Partners (Elena Rostova)",
+      "clientEmail": "billing@nexusmedia.agency",
+      "amount": 3400,
+      "currency": "USD",
+      "dueDate": "2026-10-15",
+      "daysOverdue": 26,
+      "tone": "final",
+      "toneLabel": "Final Collection Notice (22+ days overdue)",
+      "subject": "FINAL NOTICE: Immediate payment required for Invoice INV-2026-DEMO3 ($3400.00)",
+      "body": "Dear [Demo] Nexus Media Partners (Elena Rostova),\n\nThis is a FINAL NOTICE regarding outstanding Invoice INV-2026-DEMO3 in the amount of $3400.00, which became due on 2026-10-15 and is now 26 days past due.\n\nServices and deliverables have been rendered in full. Please settle this balance immediately to prevent account suspension or collection escalation:\n\nDirect PayPal Payment Link:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO3\n\nPlease confirm payment by replying with transaction confirmation.\n\nAccounts Receivable",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO3",
+      "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
+      "status": "pending",
+      "createdAt": "2026-11-10T14:17:00.136Z"
+    },
+    {
+      "id": "draft-demo-overdue-2-1794320219840",
+      "invoiceId": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "clientName": "[Demo] Quantum Labs (Dr. Aris Thorne)",
+      "clientEmail": "aris@quantumlabs.ai",
+      "amount": 1850,
+      "currency": "USD",
+      "dueDate": "2026-10-28",
+      "daysOverdue": 13,
+      "tone": "firm",
+      "toneLabel": "Firm Follow-up (8–21 days overdue)",
+      "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
+      "body": "Dear [Demo] Quantum Labs (Dr. Aris Thorne),\n\nWe are following up regarding Invoice INV-2026-DEMO2 for the amount of $1850.00, which was due on 2026-10-28 and is now 13 days overdue.\n\nPlease review the invoice and complete payment as soon as possible via the PayPal link below:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO2\n\nIf there is an issue or you need to discuss payment scheduling, please reply to this email immediately so we can coordinate.\n\nSincerely,\nFinance & Collections Team",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO2",
+      "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
+      "status": "pending",
+      "createdAt": "2026-11-10T14:16:59.840Z"
+    },
+    {
+      "id": "draft-inv-1002-1794320219528",
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "clientName": "CloudScale Systems (Sarah Jenkins)",
+      "clientEmail": "sarah.j@cloudscale.net",
+      "amount": 3200,
+      "currency": "USD",
+      "dueDate": "2026-11-05",
+      "daysOverdue": 5,
+      "tone": "friendly",
+      "toneLabel": "Friendly Reminder (1–7 days overdue)",
+      "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
+      "body": "Hi CloudScale Systems (Sarah Jenkins),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-002 for $3200.00 was due on 2026-11-05 (5 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026002\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026002",
+      "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
+      "status": "pending",
+      "createdAt": "2026-11-10T14:16:59.528Z"
+    },
+    {
+      "id": "draft-demo-overdue-1-1794320219226",
+      "invoiceId": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "clientName": "[Demo] Horizon Studio (Liam Chen)",
+      "clientEmail": "liam@horizonstudio.design",
+      "amount": 650,
+      "currency": "USD",
+      "dueDate": "2026-11-06",
+      "daysOverdue": 4,
+      "tone": "friendly",
+      "toneLabel": "Friendly Reminder (1–7 days overdue)",
+      "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
+      "body": "Hi [Demo] Horizon Studio (Liam Chen),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-DEMO1 for $650.00 was due on 2026-11-06 (4 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1",
+      "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
+      "status": "pending",
+      "createdAt": "2026-11-10T14:16:59.226Z"
+    },
+    {
+      "id": "draft-demo-overdue-3-1794320156330",
+      "invoiceId": "demo-overdue-3",
+      "invoiceNumber": "INV-2026-DEMO3",
+      "clientName": "[Demo] Nexus Media Partners (Elena Rostova)",
+      "clientEmail": "billing@nexusmedia.agency",
+      "amount": 3400,
+      "currency": "USD",
+      "dueDate": "2026-10-15",
+      "daysOverdue": 26,
+      "tone": "final",
+      "toneLabel": "Final Collection Notice (22+ days overdue)",
+      "subject": "FINAL NOTICE: Immediate payment required for Invoice INV-2026-DEMO3 ($3400.00)",
+      "body": "Dear [Demo] Nexus Media Partners (Elena Rostova),\n\nThis is a FINAL NOTICE regarding outstanding Invoice INV-2026-DEMO3 in the amount of $3400.00, which became due on 2026-10-15 and is now 26 days past due.\n\nServices and deliverables have been rendered in full. Please settle this balance immediately to prevent account suspension or collection escalation:\n\nDirect PayPal Payment Link:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO3\n\nPlease confirm payment by replying with transaction confirmation.\n\nAccounts Receivable",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO3",
+      "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
+      "status": "rejected",
+      "createdAt": "2026-11-10T14:15:56.330Z",
+      "reviewedAt": "2026-11-10T14:16:39.856Z"
+    },
+    {
+      "id": "draft-demo-overdue-2-1794320156024",
+      "invoiceId": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "clientName": "[Demo] Quantum Labs (Dr. Aris Thorne)",
+      "clientEmail": "aris@quantumlabs.ai",
+      "amount": 1850,
+      "currency": "USD",
+      "dueDate": "2026-10-28",
+      "daysOverdue": 13,
+      "tone": "firm",
+      "toneLabel": "Firm Follow-up (8–21 days overdue)",
+      "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
+      "body": "Dear [Demo] Quantum Labs (Dr. Aris Thorne),\n\nWe are following up regarding Invoice INV-2026-DEMO2 for the amount of $1850.00, which was due on 2026-10-28 and is now 13 days overdue.\n\nPlease review the invoice and complete payment as soon as possible via the PayPal link below:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO2\n\nIf there is an issue or you need to discuss payment scheduling, please reply to this email immediately so we can coordinate.\n\nSincerely,\nFinance & Collections Team",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO2",
+      "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
+      "status": "approved",
+      "createdAt": "2026-11-10T14:15:56.024Z",
+      "reviewedAt": "2026-11-10T14:16:46.476Z"
+    },
+    {
+      "id": "draft-inv-1002-1794320155701",
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "clientName": "CloudScale Systems (Sarah Jenkins)",
+      "clientEmail": "sarah.j@cloudscale.net",
+      "amount": 3200,
+      "currency": "USD",
+      "dueDate": "2026-11-05",
+      "daysOverdue": 5,
+      "tone": "friendly",
+      "toneLabel": "Friendly Reminder (1–7 days overdue)",
+      "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
+      "body": "Hi CloudScale Systems (Sarah Jenkins),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-002 for $3200.00 was due on 2026-11-05 (5 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026002\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026002",
+      "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
+      "status": "approved",
+      "createdAt": "2026-11-10T14:15:55.701Z",
+      "reviewedAt": "2026-11-10T14:16:46.476Z"
+    },
+    {
+      "id": "draft-demo-overdue-1-1794320155435",
+      "invoiceId": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "clientName": "[Demo] Horizon Studio (Liam Chen)",
+      "clientEmail": "liam@horizonstudio.design",
+      "amount": 650,
+      "currency": "USD",
+      "dueDate": "2026-11-06",
+      "daysOverdue": 4,
+      "tone": "friendly",
+      "toneLabel": "Friendly Reminder (1–7 days overdue)",
+      "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
+      "body": "Hi [Demo] Horizon Studio (Liam Chen),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-DEMO1 for $650.00 was due on 2026-11-06 (4 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1",
+      "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
+      "status": "approved",
+      "createdAt": "2026-11-10T14:15:55.435Z",
+      "reviewedAt": "2026-11-10T14:16:28.767Z"
     }
   ]
 }

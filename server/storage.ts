@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Invoice, ActivityLogEntry, InvoiceSummary } from '../types/invoice.js';
+import { Invoice, ActivityLogEntry, InvoiceSummary, ApprovalDraft, LastAgentRunSummary } from '../types/invoice.js';
 import { REAL_PAYPAL_ID_REGEX } from './paypal.js';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -9,6 +9,8 @@ const DB_FILE = path.join(DATA_DIR, 'invoices_db.json');
 interface DatabaseSchema {
   invoices: Invoice[];
   activityLogs: ActivityLogEntry[];
+  approvalQueue: ApprovalDraft[];
+  lastAgentRun?: LastAgentRunSummary;
 }
 
 const SEED_INVOICES: Invoice[] = [
@@ -219,8 +221,116 @@ const SEED_ACTIVITY: ActivityLogEntry[] = [
   },
 ];
 
+const DEMO_OVERDUE_INVOICES: Invoice[] = [
+  {
+    id: 'demo-overdue-1',
+    invoiceNumber: 'INV-2026-DEMO1',
+    clientName: '[Demo] Horizon Studio (Liam Chen)',
+    clientEmail: 'liam@horizonstudio.design',
+    description: 'Website Landing Page & Interactive Motion Graphics',
+    amount: 650.0,
+    currency: 'USD',
+    issueDate: '2026-10-23',
+    dueDate: '2026-11-06', // 4 days overdue (Tier 1: 1-7 days friendly)
+    status: 'Overdue',
+    isDemo: true,
+    rawClientMessage: 'Hi Liam, sending over the agreed landing page work invoice ($650). Due Nov 6.',
+    notes: '[Demo Data] 4 days overdue. Ideal for testing friendly reminder generation (1-7 days overdue).',
+    lineItems: [
+      {
+        id: 'li-demo-1',
+        name: 'Landing Page Responsive UI',
+        description: 'Figma to React conversion with smooth interactions',
+        quantity: 1,
+        unitPrice: 450.0,
+        total: 450.0,
+      },
+      {
+        id: 'li-demo-2',
+        name: 'Motion Graphics Asset Pack',
+        description: 'Lottie animations for hero illustration',
+        quantity: 1,
+        unitPrice: 200.0,
+        total: 200.0,
+      },
+    ],
+    createdAt: '2026-10-23T10:00:00.000Z',
+    updatedAt: '2026-11-07T00:00:00.000Z',
+  },
+  {
+    id: 'demo-overdue-2',
+    invoiceNumber: 'INV-2026-DEMO2',
+    clientName: '[Demo] Quantum Labs (Dr. Aris Thorne)',
+    clientEmail: 'aris@quantumlabs.ai',
+    description: 'Data Pipeline Automation & Real-Time Dashboard Integration',
+    amount: 1850.0,
+    currency: 'USD',
+    issueDate: '2026-10-14',
+    dueDate: '2026-10-28', // 13 days overdue (Tier 2: 8-21 days firmer)
+    status: 'Overdue',
+    isDemo: true,
+    rawClientMessage: 'Billing for Python telemetry pipeline and WebSocket dashboard: $1,850. Due Oct 28.',
+    notes: '[Demo Data] 13 days overdue. Ideal for testing firmer reminder tone and client reply negotiations.',
+    lineItems: [
+      {
+        id: 'li-demo-3',
+        name: 'ETL Pipeline & Kafka Integration',
+        description: 'High-throughput stream processing setup',
+        quantity: 1,
+        unitPrice: 1200.0,
+        total: 1200.0,
+      },
+      {
+        id: 'li-demo-4',
+        name: 'WebSocket Live Telemetry UI',
+        description: 'Real-time charts and KPI indicators',
+        quantity: 1,
+        unitPrice: 650.0,
+        total: 650.0,
+      },
+    ],
+    createdAt: '2026-10-14T11:30:00.000Z',
+    updatedAt: '2026-10-29T00:00:00.000Z',
+  },
+  {
+    id: 'demo-overdue-3',
+    invoiceNumber: 'INV-2026-DEMO3',
+    clientName: '[Demo] Nexus Media Partners (Elena Rostova)',
+    clientEmail: 'billing@nexusmedia.agency',
+    description: 'Q3 Brand Strategy & Video Post-Production Campaign',
+    amount: 3400.0,
+    currency: 'USD',
+    issueDate: '2026-09-30',
+    dueDate: '2026-10-15', // 26 days overdue (Tier 3: 22+ days final notice)
+    status: 'Overdue',
+    isDemo: true,
+    rawClientMessage: 'Deliverable complete for video post-production retainer: $3,400. Due Oct 15.',
+    notes: '[Demo Data] 26 days overdue. Ideal for testing final collection notice generation.',
+    lineItems: [
+      {
+        id: 'li-demo-5',
+        name: 'Brand Campaign Video Editing & Color Grading',
+        description: '4 video cuts for YouTube and paid ads',
+        quantity: 1,
+        unitPrice: 2200.0,
+        total: 2200.0,
+      },
+      {
+        id: 'li-demo-6',
+        name: 'Sound Design & Audio Mastering',
+        description: 'Custom Foley and voiceover mixing in 5.1',
+        quantity: 1,
+        unitPrice: 1200.0,
+        total: 1200.0,
+      },
+    ],
+    createdAt: '2026-09-30T09:00:00.000Z',
+    updatedAt: '2026-10-16T00:00:00.000Z',
+  },
+];
+
 class Storage {
-  private db: DatabaseSchema = { invoices: [], activityLogs: [] };
+  private db: DatabaseSchema = { invoices: [], activityLogs: [], approvalQueue: [] };
   private initialized = false;
 
   constructor() {
@@ -241,6 +351,10 @@ class Storage {
         if (parsed && Array.isArray(parsed.invoices) && parsed.invoices.length > 0) {
           // Strip legacy manual hash links and remove made-up fake PayPal IDs
           let cleaned = false;
+          if (!Array.isArray(parsed.approvalQueue)) {
+            parsed.approvalQueue = [];
+            cleaned = true;
+          }
           parsed.invoices.forEach((inv: any) => {
             if (
               inv.paypalPaymentLink &&
@@ -265,6 +379,15 @@ class Storage {
               cleaned = true;
             }
           });
+
+          // Check if 3 sample overdue demo invoices exist; add only if missing
+          const hasDemoOverdue = parsed.invoices.some((inv: any) => inv.id === 'demo-overdue-1');
+          if (!hasDemoOverdue) {
+            console.log('Seeding 3 sample overdue demo invoices for collections and reminder testing.');
+            parsed.invoices.push(...DEMO_OVERDUE_INVOICES);
+            cleaned = true;
+          }
+
           this.db = parsed;
           if (cleaned) {
             this.persist();
@@ -279,12 +402,14 @@ class Storage {
 
     // Seed default data
     this.db = {
-      invoices: [...SEED_INVOICES],
+      invoices: [...SEED_INVOICES, ...DEMO_OVERDUE_INVOICES],
       activityLogs: [...SEED_ACTIVITY],
+      approvalQueue: [],
     };
     this.persist();
     this.initialized = true;
   }
+
 
   private persist() {
     try {
@@ -468,6 +593,103 @@ class Storage {
       sentCount,
       paidCount,
     };
+  }
+
+  public getApprovalQueue(status?: 'pending' | 'approved' | 'rejected'): ApprovalDraft[] {
+    this.ensureInitialized();
+    if (!this.db.approvalQueue) this.db.approvalQueue = [];
+    if (status) {
+      return this.db.approvalQueue.filter((d) => d.status === status);
+    }
+    return [...this.db.approvalQueue];
+  }
+
+  public getApprovalDraftById(id: string): ApprovalDraft | undefined {
+    this.ensureInitialized();
+    if (!this.db.approvalQueue) this.db.approvalQueue = [];
+    return this.db.approvalQueue.find((d) => d.id === id);
+  }
+
+  public hasPendingDraftForInvoice(invoiceId: string): boolean {
+    this.ensureInitialized();
+    if (!this.db.approvalQueue) this.db.approvalQueue = [];
+    return this.db.approvalQueue.some((d) => d.invoiceId === invoiceId && d.status === 'pending');
+  }
+
+  public addApprovalDraft(draft: ApprovalDraft): ApprovalDraft {
+    this.ensureInitialized();
+    if (!this.db.approvalQueue) this.db.approvalQueue = [];
+    // Prevent duplicate draft for the same invoice if already pending
+    const existingIndex = this.db.approvalQueue.findIndex(
+      (d) => d.invoiceId === draft.invoiceId && d.status === 'pending'
+    );
+    if (existingIndex >= 0) {
+      return this.db.approvalQueue[existingIndex];
+    }
+    this.db.approvalQueue.unshift(draft);
+    this.persist();
+    return draft;
+  }
+
+  public updateApprovalDraft(id: string, updates: Partial<ApprovalDraft>): ApprovalDraft | null {
+    this.ensureInitialized();
+    if (!this.db.approvalQueue) this.db.approvalQueue = [];
+    const index = this.db.approvalQueue.findIndex((d) => d.id === id);
+    if (index === -1) return null;
+
+    const updated = {
+      ...this.db.approvalQueue[index],
+      ...updates,
+    };
+    this.db.approvalQueue[index] = updated;
+    this.persist();
+    return updated;
+  }
+
+  public deleteApprovalDraft(id: string): boolean {
+    this.ensureInitialized();
+    if (!this.db.approvalQueue) this.db.approvalQueue = [];
+    const index = this.db.approvalQueue.findIndex((d) => d.id === id);
+    if (index === -1) return false;
+    this.db.approvalQueue.splice(index, 1);
+    this.persist();
+    return true;
+  }
+
+  public getLastAgentRun(): LastAgentRunSummary | undefined {
+    this.ensureInitialized();
+    if (this.db.lastAgentRun) {
+      return this.db.lastAgentRun;
+    }
+    const pending = this.getApprovalQueue('pending');
+    if (pending.length > 0) {
+      return {
+        timestamp: pending[0].createdAt || new Date().toISOString(),
+        overdueCount: pending.length,
+        draftsCreatedCount: pending.length,
+        draftsReasoning: pending.map((d) => {
+          // Extract short name e.g. "Sam" from "Sam Jenkins" or "Horizon Studio (Liam Chen)" -> "Liam" or "Sam"
+          const parenMatch = d.clientName.match(/\((.*?)\)/);
+          const rawName = parenMatch ? parenMatch[1] : d.clientName;
+          const cleanName = rawName.replace(/^Dr\.\s*/i, '');
+          const shortName = cleanName.split(' ')[0] || d.clientName;
+          return {
+            clientName: d.clientName,
+            invoiceNumber: d.invoiceNumber,
+            daysOverdue: d.daysOverdue,
+            tone: d.tone,
+            line: `${shortName}: ${d.daysOverdue} days overdue, ${d.tone} tone`,
+          };
+        }),
+      };
+    }
+    return undefined;
+  }
+
+  public setLastAgentRun(summary: LastAgentRunSummary): void {
+    this.ensureInitialized();
+    this.db.lastAgentRun = summary;
+    this.persist();
   }
 }
 

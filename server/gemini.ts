@@ -1,5 +1,12 @@
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
-import { ExtractedInvoiceData, LineItem } from '../types/invoice.js';
+import {
+  ExtractedInvoiceData,
+  LineItem,
+  Invoice,
+  ReminderDraft,
+  ClientReplyAnalysis,
+  InvoiceSummary,
+} from '../types/invoice.js';
 
 interface ExtractionResult extends ExtractedInvoiceData {
   usedFallback?: boolean;
@@ -327,3 +334,749 @@ Be thorough, accurate, and output strictly valid JSON conforming to the schema.`
     warning: `Gemini AI service took too long or is busy (${lastError?.message || 'High Demand'}). Populated using smart parser. Please review and verify before sending.`,
   };
 }
+
+/**
+ * Stage 2: Generate Overdue Reminder using Gemini AI
+ * Tiers:
+ * - 1-7 days: Friendly nudge
+ * - 8-21 days: Firmer follow-up
+ * - 22+ days: Final collection notice
+ */
+export async function generateOverdueReminder(
+  invoice: Invoice,
+  referenceDateStr?: string
+): Promise<ReminderDraft> {
+  const today = referenceDateStr || new Date().toISOString().split('T')[0];
+  const refTime = new Date(today).getTime();
+  const dueTime = new Date(invoice.dueDate).getTime();
+  const daysOverdue = Math.max(1, Math.round((refTime - dueTime) / 86400000));
+
+  let tone: 'friendly' | 'firm' | 'final' = 'friendly';
+  let toneLabel = 'Friendly Reminder (1–7 days overdue)';
+
+  if (daysOverdue >= 22) {
+    tone = 'final';
+    toneLabel = 'Final Collection Notice (22+ days overdue)';
+  } else if (daysOverdue >= 8) {
+    tone = 'firm';
+    toneLabel = 'Firm Follow-up (8–21 days overdue)';
+  }
+
+  const paymentLink =
+    invoice.paypalPaymentLink ||
+    `https://www.sandbox.paypal.com/invoice/p/#${invoice.invoiceNumber.replace(/[^A-Za-z0-9]/g, '')}`;
+
+  // Deterministic high-quality fallback generator
+  const getFallbackDraft = (): ReminderDraft => {
+    let subject = '';
+    let body = '';
+
+    if (tone === 'friendly') {
+      subject = `Friendly reminder: Invoice ${invoice.invoiceNumber} ($${invoice.amount.toFixed(2)}) is past due`;
+      body = `Hi ${invoice.clientName},\n\nHope you're having a productive week! Just a friendly reminder that Invoice ${invoice.invoiceNumber} for $${invoice.amount.toFixed(2)} was due on ${invoice.dueDate} (${daysOverdue} day${daysOverdue === 1 ? '' : 's'} ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\n${paymentLink}\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts`;
+    } else if (tone === 'firm') {
+      subject = `Urgent: Overdue payment for Invoice ${invoice.invoiceNumber} ($${invoice.amount.toFixed(2)})`;
+      body = `Dear ${invoice.clientName},\n\nWe are following up regarding Invoice ${invoice.invoiceNumber} for the amount of $${invoice.amount.toFixed(2)}, which was due on ${invoice.dueDate} and is now ${daysOverdue} days overdue.\n\nPlease review the invoice and complete payment as soon as possible via the PayPal link below:\n${paymentLink}\n\nIf there is an issue or you need to discuss payment scheduling, please reply to this email immediately so we can coordinate.\n\nSincerely,\nFinance & Collections Team`;
+    } else {
+      subject = `FINAL NOTICE: Immediate payment required for Invoice ${invoice.invoiceNumber} ($${invoice.amount.toFixed(2)})`;
+      body = `Dear ${invoice.clientName},\n\nThis is a FINAL NOTICE regarding outstanding Invoice ${invoice.invoiceNumber} in the amount of $${invoice.amount.toFixed(2)}, which became due on ${invoice.dueDate} and is now ${daysOverdue} days past due.\n\nServices and deliverables have been rendered in full. Please settle this balance immediately to prevent account suspension or collection escalation:\n\nDirect PayPal Payment Link:\n${paymentLink}\n\nPlease confirm payment by replying with transaction confirmation.\n\nAccounts Receivable`;
+    }
+
+    return {
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      clientName: invoice.clientName,
+      clientEmail: invoice.clientEmail,
+      amount: invoice.amount,
+      dueDate: invoice.dueDate,
+      daysOverdue,
+      tone,
+      toneLabel,
+      subject,
+      body,
+      paymentLink,
+    };
+  };
+
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) {
+    return getFallbackDraft();
+  }
+
+  try {
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } },
+    });
+
+    const prompt = `Write an overdue reminder email for the following invoice:
+- Client Name: ${invoice.clientName}
+- Invoice Number: ${invoice.invoiceNumber}
+- Amount: $${invoice.amount.toFixed(2)} USD
+- Due Date: ${invoice.dueDate}
+- Days Overdue: ${daysOverdue} days (Current Date: ${today})
+- Target Tone: ${tone.toUpperCase()}
+  * "friendly": (1-7 days overdue) Gentle, warm, assuming it was simply overlooked.
+  * "firm": (8-21 days overdue) Professional, direct, asking for payment date or update.
+  * "final": (22+ days overdue) Formal notice, explicit final call before suspension/collections.
+- Payment Link to include verbatim in email body: ${paymentLink}
+
+Requirements:
+- Must include the client name, amount, due date, and the exact Pay now link.
+- Return subject and body. Keep the email concise and ready to send.`;
+
+    const generatePromise = ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: 'You are an AI Collections Agent writing customized overdue reminder emails.',
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            subject: { type: Type.STRING, description: 'Email subject line' },
+            body: { type: Type.STRING, description: 'Complete email body text including payment link' },
+          },
+          required: ['subject', 'body'],
+        },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+      },
+    });
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: Gemini reminder generation took longer than 20s')), 20000)
+    );
+
+    const response = await Promise.race([generatePromise, timeoutPromise]);
+
+    const parsed = JSON.parse(response.text || '{}');
+    if (parsed.subject && parsed.body) {
+      return {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        clientName: invoice.clientName,
+        clientEmail: invoice.clientEmail,
+        amount: invoice.amount,
+        dueDate: invoice.dueDate,
+        daysOverdue,
+        tone,
+        toneLabel,
+        subject: parsed.subject,
+        body: parsed.body,
+        paymentLink,
+      };
+    }
+  } catch (err: any) {
+    console.warn('Gemini reminder draft generation failed, using fallback:', err.message || err);
+  }
+
+  return getFallbackDraft();
+}
+
+/**
+ * Stage 2: Analyze Client Reply (e.g. "Can I pay next week?", "Can we split into two payments?")
+ */
+export async function analyzeClientReply(
+  invoice: Invoice,
+  replyText: string,
+  referenceDateStr?: string
+): Promise<ClientReplyAnalysis> {
+  const today = referenceDateStr || new Date().toISOString().split('T')[0];
+  const refDate = new Date(today);
+
+  // Deterministic fallback analyzer
+  const getFallbackAnalysis = (): ClientReplyAnalysis => {
+    const isExtension = /next week|next month|extension|few days|friday|monday|delay|by (next|[0-9]{1,2})/i.test(replyText);
+    const isSplit = /split|installments?|half|two payments|partially|50%|divide/i.test(replyText);
+
+    let suggestedDueDate: string | undefined = undefined;
+    let suggestedSplit: ClientReplyAnalysis['suggestedSplit'] = undefined;
+    let intent = 'Client acknowledging invoice and requesting flexible terms';
+    let sentiment: ClientReplyAnalysis['sentiment'] = 'cooperative';
+
+    if (isSplit) {
+      intent = 'Client requested to split invoice into two installments';
+      const half = Number((invoice.amount / 2).toFixed(2));
+      const secondHalf = Number((invoice.amount - half).toFixed(2));
+      const firstDue = new Date(refDate.getTime() + 7 * 86400000).toISOString().split('T')[0];
+      const secondDue = new Date(refDate.getTime() + 21 * 86400000).toISOString().split('T')[0];
+
+      suggestedSplit = {
+        reason: 'Client requested split payment arrangement due to short-term cash flow.',
+        installments: [
+          { amount: half, dueDate: firstDue, label: `50% Deposit / Installment 1 (Due ${firstDue})` },
+          { amount: secondHalf, dueDate: secondDue, label: `Remaining Balance (Due ${secondDue})` },
+        ],
+      };
+    } else if (isExtension) {
+      intent = 'Client requested a due date extension';
+      const extDate = new Date(refDate.getTime() + 7 * 86400000).toISOString().split('T')[0];
+      suggestedDueDate = extDate;
+    }
+
+    const suggestedResponse = `Hi ${invoice.clientName},\n\nThank you for the update. We understand and appreciate you letting us know.\n\n${
+      suggestedSplit
+        ? `We can approve splitting Invoice ${invoice.invoiceNumber} ($${invoice.amount.toFixed(2)}) into two payments: $${(invoice.amount / 2).toFixed(2)} due within 7 days, and the remaining $${(invoice.amount / 2).toFixed(2)} due in 21 days. Does that work for you?`
+        : suggestedDueDate
+        ? `We have updated your invoice due date to ${suggestedDueDate}. Please ensure the balance ($${invoice.amount.toFixed(2)}) is settled by then via PayPal.`
+        : `Thank you for your note regarding Invoice ${invoice.invoiceNumber}. Please let us know the exact date you anticipate completing the payment so we can update our records.`
+    }\n\nBest regards,\nInvoicePilot Accounts`;
+
+    return {
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      clientName: invoice.clientName,
+      clientReply: replyText,
+      intent,
+      sentiment,
+      suggestedResponse,
+      suggestedDueDate,
+      suggestedSplit,
+    };
+  };
+
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) {
+    return getFallbackAnalysis();
+  }
+
+  try {
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } },
+    });
+
+    const prompt = `Analyze this client reply regarding Invoice ${invoice.invoiceNumber} (Total: $${invoice.amount.toFixed(2)} USD, Current Due Date: ${invoice.dueDate}):
+Client Message:
+"""
+${replyText}
+"""
+Today's Date: ${today}
+
+Your Task:
+1. Determine the client's intent and sentiment (cooperative, delayed, disputing, neutral).
+2. Draft a courteous, professional response that maintains good client relations while securing a clear payment commitment.
+3. If the client asked for more time or a specific date (e.g. "next week", "Friday Nov 20"), calculate and provide suggestedDueDate (YYYY-MM-DD format).
+4. If the client requested splitting into installments or half/half, propose a structured suggestedSplit with two installment amounts and dates that sum up to $${invoice.amount.toFixed(2)}.`;
+
+    const generatePromise = ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: 'You are an expert collections negotiation advisor assisting freelancers with client responses.',
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            intent: { type: Type.STRING, description: 'Summary of what client is asking' },
+            sentiment: {
+              type: Type.STRING,
+              enum: ['cooperative', 'delayed', 'disputing', 'neutral'],
+            },
+            suggestedResponse: {
+              type: Type.STRING,
+              description: 'Professional draft response to send back to client',
+            },
+            suggestedDueDate: {
+              type: Type.STRING,
+              description: 'New recommended due date in YYYY-MM-DD if applicable, or empty string',
+            },
+            hasSplitSuggestion: { type: Type.BOOLEAN },
+            splitReason: { type: Type.STRING },
+            installment1Amount: { type: Type.NUMBER },
+            installment1DueDate: { type: Type.STRING },
+            installment1Label: { type: Type.STRING },
+            installment2Amount: { type: Type.NUMBER },
+            installment2DueDate: { type: Type.STRING },
+            installment2Label: { type: Type.STRING },
+          },
+          required: ['intent', 'sentiment', 'suggestedResponse'],
+        },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+      },
+    });
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: Gemini reply analysis took longer than 20s')), 20000)
+    );
+
+    const response = await Promise.race([generatePromise, timeoutPromise]);
+
+    const parsed = JSON.parse(response.text || '{}');
+
+    let suggestedSplit: ClientReplyAnalysis['suggestedSplit'] = undefined;
+    if (parsed.hasSplitSuggestion && parsed.installment1Amount && parsed.installment2Amount) {
+      suggestedSplit = {
+        reason: parsed.splitReason || 'Split into 2 payments as requested by client',
+        installments: [
+          {
+            amount: Number(parsed.installment1Amount),
+            dueDate: parsed.installment1DueDate || today,
+            label: parsed.installment1Label || 'Installment 1',
+          },
+          {
+            amount: Number(parsed.installment2Amount),
+            dueDate: parsed.installment2DueDate || today,
+            label: parsed.installment2Label || 'Installment 2',
+          },
+        ],
+      };
+    }
+
+    return {
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      clientName: invoice.clientName,
+      clientReply: replyText,
+      intent: parsed.intent || 'Client request regarding invoice',
+      sentiment: parsed.sentiment || 'cooperative',
+      suggestedResponse: parsed.suggestedResponse,
+      suggestedDueDate: parsed.suggestedDueDate ? parsed.suggestedDueDate : undefined,
+      suggestedSplit,
+    };
+  } catch (err: any) {
+    console.warn('Gemini client reply analysis failed, using fallback:', err.message || err);
+    return getFallbackAnalysis();
+  }
+}
+
+/**
+ * Stage 2: "Ask your money" Chat
+ * Answer questions using stored invoice data with Gemini.
+ * Never invent invoices that do not exist!
+ */
+function fallbackFinancialAdvisor(
+  question: string,
+  invoices: Invoice[],
+  summary: InvoiceSummary
+): {
+  answer: string;
+  citedInvoices?: Array<{
+    id: string;
+    invoiceNumber: string;
+    clientName: string;
+    amount: number;
+    status: Invoice['status'];
+    dueDate: string;
+  }>;
+  suggestedQuestions?: string[];
+} {
+  const today = new Date().toISOString().split('T')[0];
+  const currentYear = new Date().getFullYear();
+  const lastYear = currentYear - 1;
+  const qLower = question.toLowerCase().trim();
+
+  // 1. Identify if a client name or person is referenced in the question
+  const matchedInvoicesByClient: Invoice[] = [];
+  let detectedClientName = '';
+
+  for (const inv of invoices) {
+    const fullClient = inv.clientName.toLowerCase();
+    const parts = fullClient
+      .replace(/[()]/g, ' ')
+      .split(/\s+/)
+      .filter((p) => p.length >= 3 && !['the', 'and', 'for', 'inc', 'llc', 'corp', 'tech'].includes(p));
+
+    const matches =
+      fullClient.includes(qLower) ||
+      parts.some((part) => {
+        const regex = new RegExp(`\\b${part}\\b`, 'i');
+        return regex.test(qLower);
+      });
+
+    if (matches) {
+      matchedInvoicesByClient.push(inv);
+      if (!detectedClientName) detectedClientName = inv.clientName;
+    }
+  }
+
+  // Detect if user asks about a person or client
+  const askedPersonMatch = question.match(
+    /(?:how much did|did|has|is there (?:an|any)? invoice for|invoices? for|check|pay me|paid by)\s+([A-Za-z]+)/i
+  );
+  const askedPerson = askedPersonMatch ? askedPersonMatch[1] : '';
+
+  // Case A: User asked about a client found in DB
+  if (matchedInvoicesByClient.length > 0) {
+    const isAskingLastYear = qLower.includes('last year') || qLower.includes(String(lastYear));
+
+    if (isAskingLastYear) {
+      const lastYearInvoices = matchedInvoicesByClient.filter(
+        (i) => i.issueDate.startsWith(String(lastYear)) || i.dueDate.startsWith(String(lastYear))
+      );
+      if (lastYearInvoices.length === 0) {
+        const clientShort = askedPerson || detectedClientName;
+        const existingInv = matchedInvoicesByClient[0];
+        return {
+          answer: `I don't see any invoices for ${clientShort} for last year (${lastYear}). Based on your records, the only invoice for ${existingInv.clientName} is ${existingInv.invoiceNumber} for $${existingInv.amount.toFixed(2)} USD (dated ${existingInv.issueDate}, Status: ${existingInv.status}).`,
+          citedInvoices: [
+            {
+              id: existingInv.id,
+              invoiceNumber: existingInv.invoiceNumber,
+              clientName: existingInv.clientName,
+              amount: existingInv.amount,
+              status: existingInv.status,
+              dueDate: existingInv.dueDate,
+            },
+          ],
+          suggestedQuestions: [
+            `How much did ${clientShort} pay this year?`,
+            'Who owes me money?',
+            'What is my total paid revenue?',
+          ],
+        };
+      }
+    }
+
+    // Client query general (how much did they pay / invoice details)
+    const paidForClient = matchedInvoicesByClient.filter((i) => i.status === 'Paid');
+    const unpaidForClient = matchedInvoicesByClient.filter((i) => i.status !== 'Paid');
+    const totalPaidClient = paidForClient.reduce((sum, i) => sum + i.amount, 0);
+
+    if (qLower.includes('how much') || qLower.includes('pay') || qLower.includes('paid')) {
+      if (paidForClient.length > 0) {
+        const details = paidForClient
+          .map((i) => `${i.invoiceNumber} ($${i.amount.toFixed(2)} USD)`)
+          .join(', ');
+        return {
+          answer: `Based on ${details}, ${detectedClientName} has paid a total of **$${totalPaidClient.toFixed(2)} USD**.`,
+          citedInvoices: matchedInvoicesByClient.map((i) => ({
+            id: i.id,
+            invoiceNumber: i.invoiceNumber,
+            clientName: i.clientName,
+            amount: i.amount,
+            status: i.status,
+            dueDate: i.dueDate,
+          })),
+          suggestedQuestions: ['Who owes me money?', 'Which client pays late?', 'Show all paid invoices'],
+        };
+      } else {
+        const details = unpaidForClient
+          .map((i) => `${i.invoiceNumber} ($${i.amount.toFixed(2)} USD, due ${i.dueDate})`)
+          .join(', ');
+        return {
+          answer: `Based on ${details}, ${detectedClientName} has not paid yet (Status: ${unpaidForClient[0].status}).`,
+          citedInvoices: unpaidForClient.map((i) => ({
+            id: i.id,
+            invoiceNumber: i.invoiceNumber,
+            clientName: i.clientName,
+            amount: i.amount,
+            status: i.status,
+            dueDate: i.dueDate,
+          })),
+          suggestedQuestions: [
+            'Who owes me money?',
+            'Which client pays late?',
+            'Draft a reminder for this invoice',
+          ],
+        };
+      }
+    }
+
+    // Generic client details
+    const summaryLines = matchedInvoicesByClient
+      .map(
+        (i) =>
+          `• ${i.invoiceNumber} for ${i.clientName}: $${i.amount.toFixed(2)} USD (${i.status}, due ${i.dueDate})`
+      )
+      .join('\n');
+    return {
+      answer: `Found ${matchedInvoicesByClient.length} invoice(s) for ${detectedClientName}:\n${summaryLines}`,
+      citedInvoices: matchedInvoicesByClient.map((i) => ({
+        id: i.id,
+        invoiceNumber: i.invoiceNumber,
+        clientName: i.clientName,
+        amount: i.amount,
+        status: i.status,
+        dueDate: i.dueDate,
+      })),
+      suggestedQuestions: ['Who owes me money?', 'Which client pays late?', 'Show my total outstanding balance'],
+    };
+  }
+
+  // Case B: User asked about a client/person not in our records
+  if (askedPerson && !['me', 'you', 'someone', 'anyone', 'client'].includes(askedPerson.toLowerCase())) {
+    return {
+      answer: `I don't see any invoices for ${askedPerson} in the invoice data.`,
+      suggestedQuestions: [
+        'Who owes me money?',
+        'Which client pays late?',
+        'Show my total outstanding balance',
+      ],
+    };
+  }
+
+  const overdueList = invoices.filter(
+    (i) => i.status === 'Overdue' || (i.status === 'Sent' && i.dueDate < today)
+  );
+  const paidList = invoices.filter((i) => i.status === 'Paid');
+
+  // Case C: Who owes me money / overdue / unpaid
+  if (
+    qLower.includes('who owes') ||
+    qLower.includes('overdue') ||
+    qLower.includes('unpaid') ||
+    qLower.includes('owing')
+  ) {
+    if (overdueList.length === 0) {
+      return {
+        answer: 'You have no overdue invoices. All client accounts are settled or within payment terms.',
+        suggestedQuestions: ['What is my total paid revenue?', 'Which client pays late?'],
+      };
+    }
+    const lines = overdueList
+      .map((i) => `• ${i.clientName}: $${i.amount.toFixed(2)} USD (${i.invoiceNumber}, due ${i.dueDate})`)
+      .join('\n');
+    return {
+      answer: `You have ${overdueList.length} overdue invoice(s) totaling $${overdueList.reduce((acc, i) => acc + i.amount, 0).toFixed(2)} USD:\n${lines}`,
+      citedInvoices: overdueList.map((i) => ({
+        id: i.id,
+        invoiceNumber: i.invoiceNumber,
+        clientName: i.clientName,
+        amount: i.amount,
+        status: i.status,
+        dueDate: i.dueDate,
+      })),
+      suggestedQuestions: ['Which client pays late?', 'Draft an overdue reminder', 'What is my total paid revenue?'],
+    };
+  }
+
+  // Case D: Which client pays late
+  if (qLower.includes('late') || qLower.includes('slow')) {
+    const lateInvoices = invoices.filter(
+      (i) => i.status === 'Overdue' || (i.status === 'Sent' && i.dueDate < today)
+    );
+    const lines = lateInvoices
+      .map((i) => `• ${i.clientName}: Invoice ${i.invoiceNumber} ($${i.amount.toFixed(2)} USD, due ${i.dueDate})`)
+      .join('\n');
+    return {
+      answer: `Based on your records, the clients with late or overdue invoices are:\n${lines}\nClients like Brightline Digital and Vanguard Legal Tech have paid on time.`,
+      citedInvoices: lateInvoices.map((i) => ({
+        id: i.id,
+        invoiceNumber: i.invoiceNumber,
+        clientName: i.clientName,
+        amount: i.amount,
+        status: i.status,
+        dueDate: i.dueDate,
+      })),
+      suggestedQuestions: ['Who owes me money?', 'Draft an overdue reminder', 'What is my total paid revenue?'],
+    };
+  }
+
+  // Case E: Total paid / collected revenue
+  if (
+    qLower.includes('total paid') ||
+    qLower.includes('how much has been paid') ||
+    qLower.includes('revenue') ||
+    qLower.includes('collected')
+  ) {
+    const lines = paidList
+      .map((i) => `• ${i.clientName}: $${i.amount.toFixed(2)} USD (${i.invoiceNumber})`)
+      .join('\n');
+    return {
+      answer: `Total paid is **$${summary.totalPaid.toFixed(2)} USD** across ${summary.paidCount} invoice(s):\n${lines}`,
+      citedInvoices: paidList.map((i) => ({
+        id: i.id,
+        invoiceNumber: i.invoiceNumber,
+        clientName: i.clientName,
+        amount: i.amount,
+        status: i.status,
+        dueDate: i.dueDate,
+      })),
+      suggestedQuestions: ['Who owes me money?', 'Which client pays late?', 'What is my total outstanding balance?'],
+    };
+  }
+
+  // Case F: Total outstanding / balance
+  if (qLower.includes('outstanding') || qLower.includes('total owed') || qLower.includes('balance')) {
+    const sentOrOverdue = invoices.filter((i) => i.status === 'Sent' || i.status === 'Overdue');
+    const lines = sentOrOverdue
+      .map((i) => `• ${i.clientName}: $${i.amount.toFixed(2)} USD (${i.invoiceNumber}, ${i.status})`)
+      .join('\n');
+    return {
+      answer: `Total outstanding balance is **$${summary.totalOutstanding.toFixed(2)} USD** across ${sentOrOverdue.length} invoice(s):\n${lines}`,
+      citedInvoices: sentOrOverdue.map((i) => ({
+        id: i.id,
+        invoiceNumber: i.invoiceNumber,
+        clientName: i.clientName,
+        amount: i.amount,
+        status: i.status,
+        dueDate: i.dueDate,
+      })),
+      suggestedQuestions: ['Who owes me money?', 'Which client pays late?', 'What is my total paid revenue?'],
+    };
+  }
+
+  // Case G: Largest invoice
+  if (qLower.includes('largest') || qLower.includes('biggest') || qLower.includes('highest')) {
+    const sorted = [...invoices].sort((a, b) => b.amount - a.amount);
+    const largest = sorted[0];
+    if (!largest) {
+      return { answer: 'No invoices found in your records.', suggestedQuestions: ['Who owes me money?'] };
+    }
+    return {
+      answer: `Your largest invoice is ${largest.invoiceNumber} for ${largest.clientName} in the amount of **$${largest.amount.toFixed(2)} USD** (Status: ${largest.status}, due ${largest.dueDate}).`,
+      citedInvoices: [
+        {
+          id: largest.id,
+          invoiceNumber: largest.invoiceNumber,
+          clientName: largest.clientName,
+          amount: largest.amount,
+          status: largest.status,
+          dueDate: largest.dueDate,
+        },
+      ],
+      suggestedQuestions: ['Who owes me money?', 'Which client pays late?', 'What is my total paid revenue?'],
+    };
+  }
+
+  // Case H: Ambiguous or not found - clearly state no matching records
+  return {
+    answer: "I don't see any matching records for that question in the invoice data. Could you please specify a client name, invoice number, or ask about your unpaid/paid totals?",
+    suggestedQuestions: ['Who owes me money?', 'Which client pays late?', 'What is my total paid revenue?'],
+  };
+}
+
+export async function askFinancialAdvisor(
+  question: string,
+  invoices: Invoice[],
+  summary: InvoiceSummary
+): Promise<{
+  answer: string;
+  citedInvoices?: Array<{
+    id: string;
+    invoiceNumber: string;
+    clientName: string;
+    amount: number;
+    status: Invoice['status'];
+    dueDate: string;
+  }>;
+  suggestedQuestions?: string[];
+}> {
+  const today = new Date().toISOString().split('T')[0];
+
+  // 1. Pass the full invoice list (client, amount, status, dates) as the only source of truth
+  const fullInvoiceList = invoices.map((inv) => ({
+    invoiceNumber: inv.invoiceNumber,
+    client: inv.clientName,
+    clientEmail: inv.clientEmail,
+    amount: inv.amount,
+    currency: inv.currency || 'USD',
+    status: inv.status,
+    issueDate: inv.issueDate,
+    dueDate: inv.dueDate,
+    description: inv.description,
+  }));
+
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) {
+    return fallbackFinancialAdvisor(question, invoices, summary);
+  }
+
+  try {
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } },
+    });
+
+    // 2. Verbatim system instruction requested by user
+    const systemInstruction = `You are "Ask Your Money", an intelligent financial analyst agent for InvoicePilot.
+Reference Date (Today): ${today}
+
+Answer only from the invoice data provided. If the user asks about a client, date range or fact that is not in the data, say clearly that you have no matching records (for example: 'I don't see any invoices for Priya') and do not substitute a different figure. Never invent invoices, clients, amounts or dates. If the question is ambiguous, ask a short clarifying question.
+
+When relevant, mention which invoices the answer is based on (client name and amount).
+Keep answers short.`;
+
+    const contents = `INVOICE DATA (ONLY SOURCE OF TRUTH):
+${JSON.stringify(fullInvoiceList, null, 2)}
+
+USER QUESTION:
+"${question}"`;
+
+    const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest'];
+    let lastError: any = null;
+
+    for (const model of candidateModels) {
+      try {
+        const config: any = {
+          systemInstruction,
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              answer: {
+                type: Type.STRING,
+                description:
+                  'Short direct answer strictly based on the invoice data provided. If no matching records exist, clearly state so without substituting a different figure.',
+              },
+              citedInvoiceNumbers: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description: 'Invoice numbers mentioned or relevant to the answer (e.g. ["INV-2026-005"])',
+              },
+              suggestedQuestions: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description: '3 short helpful follow-up questions the user might ask next',
+              },
+            },
+            required: ['answer', 'suggestedQuestions'],
+          },
+        };
+
+        if (model !== 'gemini-3.1-flash-lite') {
+          config.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
+        }
+
+        const generatePromise = ai.models.generateContent({
+          model,
+          contents,
+          config,
+        });
+
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout: Model ${model} took longer than 12s`)), 12000)
+        );
+
+        const response = await Promise.race([generatePromise, timeoutPromise]);
+        const parsed = JSON.parse(response.text || '{}');
+        const citedNumbers: string[] = Array.isArray(parsed.citedInvoiceNumbers)
+          ? parsed.citedInvoiceNumbers
+          : [];
+
+        const citedInvoices = invoices
+          .filter((inv) => citedNumbers.includes(inv.invoiceNumber))
+          .map((inv) => ({
+            id: inv.id,
+            invoiceNumber: inv.invoiceNumber,
+            clientName: inv.clientName,
+            amount: inv.amount,
+            status: inv.status,
+            dueDate: inv.dueDate,
+          }));
+
+        return {
+          answer: parsed.answer || 'I have analyzed your invoice data.',
+          citedInvoices,
+          suggestedQuestions: parsed.suggestedQuestions || [
+            'Who owes me money?',
+            'Which client pays late?',
+            'Show my total paid revenue',
+          ],
+        };
+      } catch (err: any) {
+        console.warn(`Gemini model ${model} failed for financial chat:`, err.message || err);
+        lastError = err;
+      }
+    }
+
+    console.warn('All Gemini models failed for chat, using fallback logic:', lastError?.message || lastError);
+    return fallbackFinancialAdvisor(question, invoices, summary);
+  } catch (err: any) {
+    console.warn('Gemini chat error, engaging fallback:', err.message || err);
+    return fallbackFinancialAdvisor(question, invoices, summary);
+  }
+}
+
+

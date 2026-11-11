@@ -17,21 +17,28 @@ import {
   X,
   CreditCard,
   Send,
+  Bot,
 } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { NewInvoice } from './components/NewInvoice';
 import { InvoiceModal } from './components/InvoiceModal';
 import { ActivityLogView } from './components/ActivityLogView';
 import { PayPalGuideModal } from './components/PayPalGuideModal';
+import { ReminderModal } from './components/ReminderModal';
+import { ClientReplyModal } from './components/ClientReplyModal';
+import { AskMoneyChat } from './components/AskMoneyChat';
+import { ApprovalQueueView } from './components/ApprovalQueueView';
 import {
   Invoice,
   InvoiceSummary,
   ActivityLogEntry,
   PayPalConfigStatus,
+  ApprovalDraft,
+  LastAgentRunSummary,
 } from '../types/invoice';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'new-invoice' | 'activity'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'queue' | 'new-invoice' | 'activity' | 'ask-money'>('dashboard');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [summary, setSummary] = useState<InvoiceSummary>({
     totalOutstanding: 0,
@@ -50,10 +57,20 @@ export default function App() {
     isSandboxReady: false,
   });
 
+  // Approval Queue State
+  const [approvalDrafts, setApprovalDrafts] = useState<ApprovalDraft[]>([]);
+  const [lastAgentRun, setLastAgentRun] = useState<LastAgentRunSummary | null>(null);
+  const [isRunningAgent, setIsRunningAgent] = useState(false);
+  const hasAutoRunRef = React.useRef(false);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+
+  // Stage 2: Reminder & Client Reply Modals
+  const [reminderInvoice, setReminderInvoice] = useState<Invoice | null>(null);
+  const [replyInvoice, setReplyInvoice] = useState<Invoice | null>(null);
 
   // Quick Approval Modal State
   const [approvingInvoice, setApprovingInvoice] = useState<Invoice | null>(null);
@@ -75,10 +92,11 @@ export default function App() {
   // Data fetching
   const loadData = useCallback(async () => {
     try {
-      const [invRes, actRes, cfgRes] = await Promise.all([
+      const [invRes, actRes, cfgRes, queueRes] = await Promise.all([
         fetch('/api/invoices'),
         fetch('/api/activity'),
         fetch('/api/config-status'),
+        fetch('/api/agent/queue'),
       ]);
 
       if (invRes.ok) {
@@ -98,6 +116,14 @@ export default function App() {
         const cfgData = await cfgRes.json();
         setConfigStatus(cfgData);
       }
+
+      if (queueRes.ok) {
+        const queueData = await queueRes.json();
+        setApprovalDrafts(queueData.pendingDrafts || []);
+        if (queueData.lastAgentRun) {
+          setLastAgentRun(queueData.lastAgentRun);
+        }
+      }
     } catch (err) {
       console.error('Failed to load initial data:', err);
     } finally {
@@ -105,13 +131,152 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    loadData();
+  const loadApprovalQueue = useCallback(async () => {
+    try {
+      const res = await fetch('/api/agent/queue');
+      if (res.ok) {
+        const data = await res.json();
+        setApprovalDrafts(data.pendingDrafts || []);
+        if (data.lastAgentRun) {
+          setLastAgentRun(data.lastAgentRun);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load approval queue:', err);
+    }
+  }, []);
+
+  // Run collections agent (called manually or automatically once on load)
+  const handleRunAgent = useCallback(async (isAuto = false) => {
+    setIsRunningAgent(true);
+    try {
+      const res = await fetch('/api/agent/run', { method: 'POST' });
+      if (!res.ok) {
+        throw new Error('Failed to run collections agent');
+      }
+      const data = await res.json();
+      setApprovalDrafts(data.pendingDrafts || []);
+      if (data.lastAgentRun) {
+        setLastAgentRun(data.lastAgentRun);
+      }
+      await loadData();
+
+      if (!isAuto) {
+        showToast('success', data.message || 'Collections agent scan completed.');
+      }
+    } catch (err: any) {
+      console.error('Error running collections agent:', err);
+      if (!isAuto) {
+        showToast('error', err.message || 'Failed to run collections agent.');
+      }
+    } finally {
+      setIsRunningAgent(false);
+    }
   }, [loadData]);
 
-  // Refresh PayPal Statuses
-  const handleRefreshStatus = async () => {
-    setIsRefreshing(true);
+  // 1-Click Approve Draft from queue
+  const handleApproveDraft = async (
+    draftId: string,
+    customDetails?: { subject?: string; body?: string; recipientEmail?: string }
+  ) => {
+    try {
+      const res = await fetch(`/api/agent/queue/${draftId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customDetails || {}),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to approve draft');
+      }
+
+      const data = await res.json();
+      showToast('success', data.message || 'Reminder approved and dispatched.');
+      await Promise.all([loadData(), loadApprovalQueue()]);
+    } catch (err: any) {
+      console.error('Approve draft error:', err);
+      showToast('error', err.message || 'Failed to approve reminder.');
+    }
+  };
+
+  // 1-Click Reject Draft from queue
+  const handleRejectDraft = async (draftId: string, reason?: string) => {
+    try {
+      const res = await fetch(`/api/agent/queue/${draftId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason || 'Dismissed by user' }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to reject draft');
+      }
+
+      const data = await res.json();
+      showToast('info', data.message || 'Reminder draft dismissed.');
+      await Promise.all([loadData(), loadApprovalQueue()]);
+    } catch (err: any) {
+      console.error('Reject draft error:', err);
+      showToast('error', err.message || 'Failed to reject reminder.');
+    }
+  };
+
+  // Update Draft details (inline editing)
+  const handleUpdateDraft = async (draftId: string, updates: Partial<ApprovalDraft>) => {
+    try {
+      const res = await fetch(`/api/agent/queue/${draftId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to update draft');
+      }
+
+      showToast('success', 'Draft reminder updated.');
+      await loadApprovalQueue();
+    } catch (err: any) {
+      console.error('Update draft error:', err);
+      showToast('error', err.message || 'Failed to update draft.');
+    }
+  };
+
+  // 1-Click Batch Approve All pending drafts
+  const handleApproveAllDrafts = async () => {
+    try {
+      const res = await fetch('/api/agent/queue/approve-all', { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to batch approve drafts');
+      }
+      const data = await res.json();
+      showToast('success', data.message || 'All pending reminders approved and dispatched.');
+      await Promise.all([loadData(), loadApprovalQueue()]);
+    } catch (err: any) {
+      console.error('Batch approve error:', err);
+      showToast('error', err.message || 'Failed to approve all drafts.');
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+    // Run collections agent automatically once when the app loads
+    if (!hasAutoRunRef.current) {
+      hasAutoRunRef.current = true;
+      handleRunAgent(true);
+    }
+  }, [loadData, handleRunAgent]);
+
+  // Refresh PayPal Statuses (Manual click or 30s background auto-sync)
+  const refreshInvoiceStatuses = useCallback(async (isBackground = false) => {
+    if (!isBackground) {
+      setIsRefreshing(true);
+    }
+
     try {
       const res = await fetch('/api/invoices/refresh-status', {
         method: 'POST',
@@ -122,32 +287,73 @@ export default function App() {
       }
 
       const data = await res.json();
-      setInvoices(data.invoices || []);
-      setSummary(data.summary);
-
-      // Re-fetch activity logs
-      const actRes = await fetch('/api/activity');
-      if (actRes.ok) {
-        setActivityLogs(await actRes.json());
+      if (data.invoices) {
+        setInvoices(data.invoices);
+      }
+      if (data.summary) {
+        setSummary(data.summary);
       }
 
-      if (data.syncErrors && data.syncErrors.length > 0) {
-        showToast(
-          'error',
-          `PayPal Status Sync: ${data.updatedCount} updated. ${data.syncErrors.length} invoice(s) reported issues.`
-        );
-      } else {
-        showToast(
-          'success',
-          `PayPal Status Check: ${data.updatedCount} invoice(s) updated based on sandbox data.`
-        );
+      // When an invoice becomes Paid, show a small "Payment received" notification and update activity log
+      if (data.newlyPaidInvoices && data.newlyPaidInvoices.length > 0) {
+        for (const paidInv of data.newlyPaidInvoices) {
+          showToast(
+            'success',
+            `Payment received: Invoice ${paidInv.invoiceNumber} ($${paidInv.amount.toFixed(2)} USD) from ${paidInv.clientName} is now Paid!`
+          );
+        }
+        const actRes = await fetch('/api/activity');
+        if (actRes.ok) {
+          setActivityLogs(await actRes.json());
+        }
+      } else if (!isBackground) {
+        // Re-fetch activity logs on manual refresh
+        const actRes = await fetch('/api/activity');
+        if (actRes.ok) {
+          setActivityLogs(await actRes.json());
+        }
+      }
+
+      if (!isBackground) {
+        if (data.syncErrors && data.syncErrors.length > 0) {
+          showToast(
+            'error',
+            `PayPal Status Sync: ${data.updatedCount} updated. ${data.syncErrors.length} invoice(s) reported issues.`
+          );
+        } else {
+          showToast(
+            'success',
+            `PayPal Status Check: ${data.updatedCount} invoice(s) updated based on sandbox data.`
+          );
+        }
       }
     } catch (err: any) {
-      console.error('Refresh status error:', err);
-      showToast('error', err.message || 'Error checking PayPal status');
+      if (!isBackground) {
+        console.error('Refresh status error:', err);
+        showToast('error', err.message || 'Error checking PayPal status');
+      } else {
+        // Do not show an error pop-up if background auto-check fails; silently retry next interval
+        console.warn('Background PayPal status auto-sync failed (will retry in 30s):', err);
+      }
     } finally {
-      setIsRefreshing(false);
+      if (!isBackground) {
+        setIsRefreshing(false);
+      }
     }
+  }, []);
+
+  // Automatic status updates: every 30 seconds while the app is open
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshInvoiceStatuses(true);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [refreshInvoiceStatuses]);
+
+  // Manual refresh trigger
+  const handleRefreshStatus = () => {
+    refreshInvoiceStatuses(false);
   };
 
   // Mark invoice as paid
@@ -256,6 +462,27 @@ export default function App() {
               </button>
 
               <button
+                onClick={() => setActiveTab('queue')}
+                className={`inline-flex items-center px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
+                  activeTab === 'queue'
+                    ? 'bg-blue-600 text-white shadow-2xs'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <Bot className="w-4 h-4 mr-1.5" />
+                <span>Approval queue</span>
+                {approvalDrafts.filter((d) => d.status === 'pending').length > 0 && (
+                  <span
+                    className={`ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      activeTab === 'queue' ? 'bg-white text-blue-700' : 'bg-amber-500 text-white'
+                    }`}
+                  >
+                    {approvalDrafts.filter((d) => d.status === 'pending').length}
+                  </span>
+                )}
+              </button>
+
+              <button
                 onClick={() => setActiveTab('new-invoice')}
                 className={`inline-flex items-center px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
                   activeTab === 'new-invoice'
@@ -268,6 +495,18 @@ export default function App() {
               </button>
 
               <button
+                onClick={() => setActiveTab('ask-money')}
+                className={`inline-flex items-center px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
+                  activeTab === 'ask-money'
+                    ? 'bg-blue-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 mr-1.5 text-amber-500" />
+                <span>Ask your money</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab('activity')}
                 className={`inline-flex items-center px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
                   activeTab === 'activity'
@@ -276,8 +515,7 @@ export default function App() {
                 }`}
               >
                 <History className="w-4 h-4 mr-1.5 text-slate-500" />
-                <span className="hidden sm:inline">Activity Log</span>
-                <span className="sm:hidden">Logs</span>
+                <span>Activity log</span>
               </button>
             </nav>
 
@@ -310,11 +548,33 @@ export default function App() {
             summary={summary}
             isLoading={isLoading}
             isRefreshing={isRefreshing}
+            pendingDraftsCount={approvalDrafts.filter((d) => d.status === 'pending').length}
+            isRunningAgent={isRunningAgent}
+            onGoToQueue={() => setActiveTab('queue')}
+            onRunAgent={() => handleRunAgent(false)}
             onRefreshStatus={handleRefreshStatus}
             onSelectInvoice={(inv) => setSelectedInvoice(inv)}
             onNewInvoice={() => setActiveTab('new-invoice')}
             onApproveAndSend={(inv) => setApprovingInvoice(inv)}
             onMarkPaid={handleMarkPaid}
+            onDraftReminder={(inv) => setReminderInvoice(inv)}
+            onClientReply={(inv) => setReplyInvoice(inv)}
+          />
+        )}
+
+        {activeTab === 'queue' && (
+          <ApprovalQueueView
+            drafts={approvalDrafts}
+            invoices={invoices}
+            isLoading={isLoading}
+            isRunningAgent={isRunningAgent}
+            lastAgentRun={lastAgentRun}
+            onRunAgent={() => handleRunAgent(false)}
+            onApprove={handleApproveDraft}
+            onReject={handleRejectDraft}
+            onUpdateDraft={handleUpdateDraft}
+            onApproveAll={handleApproveAllDrafts}
+            onSelectInvoice={(inv) => setSelectedInvoice(inv)}
           />
         )}
 
@@ -326,6 +586,14 @@ export default function App() {
               showToast('success', `Invoice ${newInv.invoiceNumber} processed successfully.`);
             }}
             onCancel={() => setActiveTab('dashboard')}
+          />
+        )}
+
+        {activeTab === 'ask-money' && (
+          <AskMoneyChat
+            invoices={invoices}
+            summary={summary}
+            onSelectInvoice={(inv) => setSelectedInvoice(inv)}
           />
         )}
 
@@ -342,7 +610,34 @@ export default function App() {
         onClose={() => setSelectedInvoice(null)}
         onMarkPaid={handleMarkPaid}
         onApproveAndSend={(inv) => setApprovingInvoice(inv)}
+        onDraftReminder={(inv) => setReminderInvoice(inv)}
+        onClientReply={(inv) => setReplyInvoice(inv)}
       />
+
+      {/* Stage 2: Overdue Reminder Drafting Modal */}
+      <ReminderModal
+        invoice={reminderInvoice}
+        isOpen={Boolean(reminderInvoice)}
+        onClose={() => setReminderInvoice(null)}
+        onReminderSent={(updatedInv, msg) => {
+          setInvoices((prev) => prev.map((i) => (i.id === updatedInv.id ? updatedInv : i)));
+          loadData();
+          showToast('success', msg);
+        }}
+      />
+
+      {/* Stage 2: Client Reply Assistant Modal */}
+      <ClientReplyModal
+        invoice={replyInvoice}
+        isOpen={Boolean(replyInvoice)}
+        onClose={() => setReplyInvoice(null)}
+        onTermsApplied={(updatedInv, msg) => {
+          setInvoices((prev) => prev.map((i) => (i.id === updatedInv.id ? updatedInv : i)));
+          loadData();
+          showToast('success', msg);
+        }}
+      />
+
 
       {/* Approval Confirmation Dialog (Explicit Human Review) */}
       {approvingInvoice && (
