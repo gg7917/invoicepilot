@@ -1,21 +1,55 @@
 import fs from 'fs';
 import path from 'path';
-import { Invoice, ActivityLogEntry, InvoiceSummary, ApprovalDraft, LastAgentRunSummary } from '../types/invoice.js';
+import crypto from 'crypto';
+import {
+  Invoice,
+  ActivityLogEntry,
+  InvoiceSummary,
+  ApprovalDraft,
+  LastAgentRunSummary,
+  BusinessUser,
+  BusinessUserRecord,
+  SessionRecord,
+} from '../types/invoice.js';
 import { REAL_PAYPAL_ID_REGEX } from './paypal.js';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'invoices_db.json');
 
+export const DEMO_BUSINESS_ID = 'biz-demo-001';
+export const DEMO_EMAIL = 'demo@example.com';
+export const DEMO_PASSWORD = 'Demo1234!';
+export const DEMO_BUSINESS_NAME = 'Apex Creative Studio';
+
+export function hashPassword(password: string, saltInput?: string): { salt: string; hash: string } {
+  const salt = saltInput || crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return { salt, hash };
+}
+
+export function verifyPassword(password: string, salt: string, storedHash: string): boolean {
+  try {
+    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(storedHash, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
 interface DatabaseSchema {
+  businesses: BusinessUserRecord[];
+  sessions: SessionRecord[];
   invoices: Invoice[];
   activityLogs: ActivityLogEntry[];
   approvalQueue: ApprovalDraft[];
-  lastAgentRun?: LastAgentRunSummary;
+  lastAgentRuns?: Record<string, LastAgentRunSummary>;
+  lastAgentRun?: LastAgentRunSummary; // legacy format
 }
 
 const SEED_INVOICES: Invoice[] = [
   {
     id: 'inv-1001',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-001',
     clientName: 'Apex Creative Labs (Ravi Sharma)',
     clientEmail: 'ravi@apexcreative.io',
@@ -50,6 +84,7 @@ const SEED_INVOICES: Invoice[] = [
   },
   {
     id: 'inv-1002',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-002',
     clientName: 'CloudScale Systems (Sarah Jenkins)',
     clientEmail: 'sarah.j@cloudscale.net',
@@ -76,6 +111,7 @@ const SEED_INVOICES: Invoice[] = [
   },
   {
     id: 'inv-1003',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-003',
     clientName: 'Nordic Wellness Co. (Elin Larsson)',
     clientEmail: 'finance@nordicwellness.se',
@@ -102,6 +138,7 @@ const SEED_INVOICES: Invoice[] = [
   },
   {
     id: 'inv-1004',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-004',
     clientName: 'Vanguard Legal Tech (Marcus Vance)',
     clientEmail: 'mvance@vanguardtech.co',
@@ -128,6 +165,7 @@ const SEED_INVOICES: Invoice[] = [
   },
   {
     id: 'inv-1005',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-005',
     clientName: 'Brightline Digital (Priya Patel)',
     clientEmail: 'priya@brightline.agency',
@@ -154,76 +192,10 @@ const SEED_INVOICES: Invoice[] = [
   },
 ];
 
-const SEED_ACTIVITY: ActivityLogEntry[] = [
-  {
-    id: 'act-1',
-    invoiceId: 'inv-1001',
-    invoiceNumber: 'INV-2026-001',
-    action: 'created',
-    description: 'Draft invoice extracted from Ravi Sharma message via Gemini AI',
-    timestamp: '2026-11-08T09:15:00.000Z',
-  },
-  {
-    id: 'act-2',
-    invoiceId: 'inv-1003',
-    invoiceNumber: 'INV-2026-003',
-    action: 'created',
-    description: 'Extracted invoice from client email message via Gemini AI',
-    timestamp: '2026-11-02T11:00:00.000Z',
-  },
-  {
-    id: 'act-3',
-    invoiceId: 'inv-1003',
-    invoiceNumber: 'INV-2026-003',
-    action: 'approved',
-    description: 'User reviewed and approved invoice details for $1,450.00',
-    timestamp: '2026-11-02T11:04:30.000Z',
-  },
-  {
-    id: 'act-4',
-    invoiceId: 'inv-1003',
-    invoiceNumber: 'INV-2026-003',
-    action: 'sent',
-    description: 'Dispatched invoice via PayPal Invoicing API Sandbox (ID: INV2-NW-3319-SANDBOX)',
-    timestamp: '2026-11-02T11:05:00.000Z',
-  },
-  {
-    id: 'act-5',
-    invoiceId: 'inv-1002',
-    invoiceNumber: 'INV-2026-002',
-    action: 'sent',
-    description: 'Invoice dispatched to sarah.j@cloudscale.net via PayPal Sandbox',
-    timestamp: '2026-10-22T14:35:00.000Z',
-  },
-  {
-    id: 'act-6',
-    invoiceId: 'inv-1002',
-    invoiceNumber: 'INV-2026-002',
-    action: 'status_checked',
-    description: 'Invoice due date (2026-11-05) lapsed without payment; marked as Overdue',
-    timestamp: '2026-11-06T00:00:00.000Z',
-  },
-  {
-    id: 'act-7',
-    invoiceId: 'inv-1004',
-    invoiceNumber: 'INV-2026-004',
-    action: 'paid',
-    description: 'Payment of $850.00 confirmed on PayPal Sandbox for Marcus Vance',
-    timestamp: '2026-10-27T16:20:00.000Z',
-  },
-  {
-    id: 'act-8',
-    invoiceId: 'inv-1005',
-    invoiceNumber: 'INV-2026-005',
-    action: 'paid',
-    description: 'Payment of $2,000.00 received for October Retainer',
-    timestamp: '2026-10-30T17:45:00.000Z',
-  },
-];
-
 const DEMO_OVERDUE_INVOICES: Invoice[] = [
   {
     id: 'demo-overdue-1',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-DEMO1',
     clientName: '[Demo] Horizon Studio (Liam Chen)',
     clientEmail: 'liam@horizonstudio.design',
@@ -231,7 +203,7 @@ const DEMO_OVERDUE_INVOICES: Invoice[] = [
     amount: 650.0,
     currency: 'USD',
     issueDate: '2026-10-23',
-    dueDate: '2026-11-06', // 4 days overdue (Tier 1: 1-7 days friendly)
+    dueDate: '2026-11-06',
     status: 'Overdue',
     isDemo: true,
     rawClientMessage: 'Hi Liam, sending over the agreed landing page work invoice ($650). Due Nov 6.',
@@ -259,6 +231,7 @@ const DEMO_OVERDUE_INVOICES: Invoice[] = [
   },
   {
     id: 'demo-overdue-2',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-DEMO2',
     clientName: '[Demo] Quantum Labs (Dr. Aris Thorne)',
     clientEmail: 'aris@quantumlabs.ai',
@@ -266,7 +239,7 @@ const DEMO_OVERDUE_INVOICES: Invoice[] = [
     amount: 1850.0,
     currency: 'USD',
     issueDate: '2026-10-14',
-    dueDate: '2026-10-28', // 13 days overdue (Tier 2: 8-21 days firmer)
+    dueDate: '2026-10-28',
     status: 'Overdue',
     isDemo: true,
     rawClientMessage: 'Billing for Python telemetry pipeline and WebSocket dashboard: $1,850. Due Oct 28.',
@@ -294,6 +267,7 @@ const DEMO_OVERDUE_INVOICES: Invoice[] = [
   },
   {
     id: 'demo-overdue-3',
+    businessId: DEMO_BUSINESS_ID,
     invoiceNumber: 'INV-2026-DEMO3',
     clientName: '[Demo] Nexus Media Partners (Elena Rostova)',
     clientEmail: 'billing@nexusmedia.agency',
@@ -301,7 +275,7 @@ const DEMO_OVERDUE_INVOICES: Invoice[] = [
     amount: 3400.0,
     currency: 'USD',
     issueDate: '2026-09-30',
-    dueDate: '2026-10-15', // 26 days overdue (Tier 3: 22+ days final notice)
+    dueDate: '2026-10-15',
     status: 'Overdue',
     isDemo: true,
     rawClientMessage: 'Deliverable complete for video post-production retainer: $3,400. Due Oct 15.',
@@ -329,53 +303,145 @@ const DEMO_OVERDUE_INVOICES: Invoice[] = [
   },
 ];
 
-class Storage {
-  private db: DatabaseSchema = { invoices: [], activityLogs: [], approvalQueue: [] };
-  private initialized = false;
+const SEED_ACTIVITY: ActivityLogEntry[] = [
+  {
+    id: 'act-101',
+    businessId: DEMO_BUSINESS_ID,
+    invoiceId: 'inv-1001',
+    invoiceNumber: 'INV-2026-001',
+    action: 'created',
+    description: 'Invoice extracted from client message via Gemini AI parser',
+    timestamp: '2026-11-08T09:15:00.000Z',
+  },
+  {
+    id: 'act-102',
+    businessId: DEMO_BUSINESS_ID,
+    invoiceId: 'inv-1004',
+    invoiceNumber: 'INV-2026-004',
+    action: 'paid',
+    description: 'Payment of $850.00 USD confirmed via PayPal Sandbox Invoicing API',
+    timestamp: '2026-10-27T16:20:00.000Z',
+  },
+  {
+    id: 'act-103',
+    businessId: DEMO_BUSINESS_ID,
+    invoiceId: 'inv-1005',
+    invoiceNumber: 'INV-2026-005',
+    action: 'paid',
+    description: 'Payment of $2,000.00 USD confirmed via PayPal Sandbox Invoicing API',
+    timestamp: '2026-10-30T17:45:00.000Z',
+  },
+  {
+    id: 'act-104',
+    businessId: DEMO_BUSINESS_ID,
+    invoiceId: 'inv-1003',
+    invoiceNumber: 'INV-2026-003',
+    action: 'sent',
+    description: 'Invoice approved and dispatched to Nordic Wellness Co. via PayPal Sandbox',
+    timestamp: '2026-11-02T11:05:00.000Z',
+  },
+];
 
-  constructor() {
-    this.ensureInitialized();
-  }
+class Storage {
+  private db: DatabaseSchema = {
+    businesses: [],
+    sessions: [],
+    invoices: [],
+    activityLogs: [],
+    approvalQueue: [],
+    lastAgentRuns: {},
+  };
+  private initialized = false;
 
   private ensureInitialized() {
     if (this.initialized) return;
 
-    try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-      }
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
 
+    try {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.invoices) && parsed.invoices.length > 0) {
-          // Strip legacy manual hash links and remove made-up fake PayPal IDs
+        if (parsed && Array.isArray(parsed.invoices)) {
           let cleaned = false;
+
+          if (!Array.isArray(parsed.businesses)) {
+            parsed.businesses = [];
+            cleaned = true;
+          }
+          if (!Array.isArray(parsed.sessions)) {
+            parsed.sessions = [];
+            cleaned = true;
+          }
           if (!Array.isArray(parsed.approvalQueue)) {
             parsed.approvalQueue = [];
             cleaned = true;
           }
+          if (!parsed.lastAgentRuns) {
+            parsed.lastAgentRuns = {};
+            if (parsed.lastAgentRun) {
+              parsed.lastAgentRuns[DEMO_BUSINESS_ID] = parsed.lastAgentRun;
+              delete parsed.lastAgentRun;
+            }
+            cleaned = true;
+          }
+
+          // Ensure Seeded Demo Business Account exists
+          let demoBiz = parsed.businesses.find(
+            (b: any) => b.id === DEMO_BUSINESS_ID || b.email.toLowerCase() === DEMO_EMAIL.toLowerCase()
+          );
+
+          if (!demoBiz) {
+            console.log(`Seeding demo business account (${DEMO_EMAIL})`);
+            const { salt, hash } = hashPassword(DEMO_PASSWORD);
+            demoBiz = {
+              id: DEMO_BUSINESS_ID,
+              email: DEMO_EMAIL.toLowerCase(),
+              businessName: DEMO_BUSINESS_NAME,
+              passwordSalt: salt,
+              passwordHash: hash,
+              createdAt: '2026-11-01T00:00:00.000Z',
+            };
+            parsed.businesses.unshift(demoBiz);
+            cleaned = true;
+          }
+
+          // Migrate all existing invoices without a businessId to demo business, and ensure payToken
           parsed.invoices.forEach((inv: any) => {
-            if (
-              inv.paypalPaymentLink &&
-              (inv.paypalPaymentLink.includes('#CS9842') ||
-                inv.paypalPaymentLink.includes('#NW3319') ||
-                inv.paypalPaymentLink.includes('#VL7721') ||
-                inv.paypalPaymentLink.includes('#BL5501') ||
-                inv.paypalPaymentLink.includes('SANDBOX-DEMO') ||
-                inv.paypalPaymentLink.includes('#INV2') ||
-                inv.paypalPaymentLink.includes('undefined'))
-            ) {
-              delete inv.paypalPaymentLink;
+            if (!inv.businessId) {
+              inv.businessId = DEMO_BUSINESS_ID;
               cleaned = true;
             }
-
-            // Cleanse made-up IDs that do not match real PayPal format INV2-XXXX-XXXX-XXXX-XXXX
+            if (!inv.payToken) {
+              inv.payToken = crypto.randomBytes(16).toString('hex');
+              cleaned = true;
+            }
+            // Sanitize invalid non-standard PayPal IDs
             if (inv.paypalInvoiceId && !REAL_PAYPAL_ID_REGEX.test(inv.paypalInvoiceId)) {
               console.log(`Clearing made-up PayPal ID "${inv.paypalInvoiceId}" from invoice ${inv.invoiceNumber}`);
               delete inv.paypalInvoiceId;
               delete inv.paypalPaymentLink;
               delete inv.paypalSellerLink;
+              cleaned = true;
+            }
+          });
+
+          // Migrate existing activity logs without businessId
+          if (Array.isArray(parsed.activityLogs)) {
+            parsed.activityLogs.forEach((log: any) => {
+              if (!log.businessId) {
+                log.businessId = DEMO_BUSINESS_ID;
+                cleaned = true;
+              }
+            });
+          }
+
+          // Migrate existing approval queue drafts without businessId
+          parsed.approvalQueue.forEach((draft: any) => {
+            if (!draft.businessId) {
+              draft.businessId = DEMO_BUSINESS_ID;
               cleaned = true;
             }
           });
@@ -400,16 +466,28 @@ class Storage {
       console.warn('Failed to read existing database, re-seeding:', err);
     }
 
-    // Seed default data
+    // Default Fresh Seed
+    const { salt, hash } = hashPassword(DEMO_PASSWORD);
+    const demoBizRecord: BusinessUserRecord = {
+      id: DEMO_BUSINESS_ID,
+      email: DEMO_EMAIL.toLowerCase(),
+      businessName: DEMO_BUSINESS_NAME,
+      passwordSalt: salt,
+      passwordHash: hash,
+      createdAt: '2026-11-01T00:00:00.000Z',
+    };
+
     this.db = {
+      businesses: [demoBizRecord],
+      sessions: [],
       invoices: [...SEED_INVOICES, ...DEMO_OVERDUE_INVOICES],
       activityLogs: [...SEED_ACTIVITY],
       approvalQueue: [],
+      lastAgentRuns: {},
     };
     this.persist();
     this.initialized = true;
   }
-
 
   private persist() {
     try {
@@ -421,23 +499,154 @@ class Storage {
     }
   }
 
-  public getInvoices(): Invoice[] {
+  // --- Business Account & Auth Methods ---
+
+  public findBusinessByEmail(email: string): BusinessUserRecord | undefined {
     this.ensureInitialized();
-    // Auto-update overdue status if due date has passed and still Sent
+    const cleanEmail = email.trim().toLowerCase();
+    return this.db.businesses.find((b) => b.email.toLowerCase() === cleanEmail);
+  }
+
+  public findBusinessRecordByEmail(email: string): BusinessUserRecord | undefined {
+    return this.findBusinessByEmail(email);
+  }
+
+  public findBusinessById(id: string): BusinessUser | undefined {
+    this.ensureInitialized();
+    const b = this.db.businesses.find((b) => b.id === id);
+    if (!b) return undefined;
+    return {
+      id: b.id,
+      email: b.email,
+      businessName: b.businessName,
+      createdAt: b.createdAt,
+    };
+  }
+
+  public findBusinessRecordById(id: string): BusinessUserRecord | undefined {
+    this.ensureInitialized();
+    return this.db.businesses.find((b) => b.id === id);
+  }
+
+  public createBusiness(email: string, password: string, businessName: string): BusinessUser {
+    this.ensureInitialized();
+    const cleanEmail = email.trim().toLowerCase();
+    const { salt, hash } = hashPassword(password);
+    const newBiz: BusinessUserRecord = {
+      id: `biz-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      email: cleanEmail,
+      businessName: businessName.trim(),
+      passwordSalt: salt,
+      passwordHash: hash,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.db.businesses.unshift(newBiz);
+
+    // Add initial activity log for the new business
+    this.addActivity(
+      {
+        action: 'created',
+        description: `Welcome to NudgePay! Business account "${newBiz.businessName}" created.`,
+      },
+      newBiz.id
+    );
+
+    this.persist();
+    return {
+      id: newBiz.id,
+      email: newBiz.email,
+      businessName: newBiz.businessName,
+      createdAt: newBiz.createdAt,
+    };
+  }
+
+  public createSession(businessId: string): SessionRecord {
+    this.ensureInitialized();
+    if (!this.db.sessions) this.db.sessions = [];
+    if (businessId === DEMO_BUSINESS_ID) {
+      const demoSession: SessionRecord = {
+        token: 'demo-session-token-2026',
+        businessId: DEMO_BUSINESS_ID,
+        createdAt: new Date().toISOString(),
+        expiresAt: '2099-01-01T00:00:00.000Z',
+      };
+      if (!this.db.sessions.some((s) => s.token === 'demo-session-token-2026')) {
+        this.db.sessions.push(demoSession);
+        this.persist();
+      }
+      return demoSession;
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const now = new Date();
+    // 30 days session
+    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const session: SessionRecord = {
+      token,
+      businessId,
+      createdAt: now.toISOString(),
+      expiresAt,
+    };
+    this.db.sessions.push(session);
+    this.persist();
+    return session;
+  }
+
+  public getSession(token: string): SessionRecord | undefined {
+    this.ensureInitialized();
+    if (token === 'demo-session-token-2026') {
+      return {
+        token: 'demo-session-token-2026',
+        businessId: DEMO_BUSINESS_ID,
+        createdAt: '2026-11-01T00:00:00.000Z',
+        expiresAt: '2099-01-01T00:00:00.000Z',
+      };
+    }
+    if (!this.db.sessions) this.db.sessions = [];
+    const session = this.db.sessions.find((s) => s.token === token);
+    if (!session) return undefined;
+    if (new Date(session.expiresAt) < new Date()) {
+      this.deleteSession(token);
+      return undefined;
+    }
+    return session;
+  }
+
+  public deleteSession(token: string): void {
+    this.ensureInitialized();
+    if (!this.db.sessions) return;
+    const index = this.db.sessions.findIndex((s) => s.token === token);
+    if (index !== -1) {
+      this.db.sessions.splice(index, 1);
+      this.persist();
+    }
+  }
+
+  // --- Multi-Tenant Invoicing Methods ---
+
+  public getInvoices(businessId: string): Invoice[] {
+    this.ensureInitialized();
     const today = new Date().toISOString().split('T')[0];
     let changed = false;
 
-    this.db.invoices.forEach((inv) => {
+    // Filter by businessId
+    const businessInvoices = this.db.invoices.filter((inv) => inv.businessId === businessId);
+
+    businessInvoices.forEach((inv) => {
       if (inv.status === 'Sent' && inv.dueDate < today) {
         inv.status = 'Overdue';
         inv.updatedAt = new Date().toISOString();
         changed = true;
-        this.addActivity({
-          invoiceId: inv.id,
-          invoiceNumber: inv.invoiceNumber,
-          action: 'status_checked',
-          description: `Invoice ${inv.invoiceNumber} due date (${inv.dueDate}) has passed; marked as Overdue.`,
-        });
+        this.addActivity(
+          {
+            invoiceId: inv.id,
+            invoiceNumber: inv.invoiceNumber,
+            action: 'status_checked',
+            description: `Invoice ${inv.invoiceNumber} due date (${inv.dueDate}) has passed; marked as Overdue.`,
+          },
+          businessId
+        );
       }
     });
 
@@ -445,118 +654,200 @@ class Storage {
       this.persist();
     }
 
-    return [...this.db.invoices].sort(
+    return businessInvoices.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 
-  public getInvoiceById(id: string): Invoice | undefined {
+  public getInvoiceById(id: string, businessId?: string): Invoice | undefined {
     this.ensureInitialized();
-    return this.db.invoices.find((inv) => inv.id === id);
+    return this.db.invoices.find(
+      (inv) => inv.id === id && (!businessId || inv.businessId === businessId)
+    );
+  }
+
+  public getInvoiceByPayToken(payToken: string): { invoice: Invoice; businessName: string } | undefined {
+    this.ensureInitialized();
+    const cleanToken = (payToken || '').trim();
+    if (!cleanToken) return undefined;
+    const invoice = this.db.invoices.find((inv) => inv.payToken === cleanToken);
+    if (!invoice) return undefined;
+    const business = invoice.businessId ? this.findBusinessById(invoice.businessId) : undefined;
+    const businessName = business?.businessName || DEMO_BUSINESS_NAME;
+    return { invoice, businessName };
+  }
+
+  public addClientMessage(
+    payToken: string,
+    messageText: string
+  ): { invoice: Invoice; message: { id: string; message: string; timestamp: string; sender: 'client' } } | undefined {
+    this.ensureInitialized();
+    const cleanToken = (payToken || '').trim();
+    const invoice = this.db.invoices.find((inv) => inv.payToken === cleanToken);
+    if (!invoice) return undefined;
+
+    const messageObj = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      message: messageText.trim(),
+      timestamp: new Date().toISOString(),
+      sender: 'client' as const,
+    };
+
+    if (!Array.isArray(invoice.clientMessages)) {
+      invoice.clientMessages = [];
+    }
+    invoice.clientMessages.push(messageObj);
+    invoice.rawClientMessage = messageText.trim();
+    invoice.updatedAt = new Date().toISOString();
+
+    const businessId = invoice.businessId || DEMO_BUSINESS_ID;
+    this.addActivity(
+      {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        action: 'client_message',
+        description: `Customer message received on Invoice ${invoice.invoiceNumber} (${invoice.clientName}): "${messageText.trim().substring(0, 80)}"`,
+        metadata: {
+          messageId: messageObj.id,
+          fullMessage: messageText.trim(),
+          clientName: invoice.clientName,
+          payToken,
+        },
+      },
+      businessId
+    );
+
+    this.persist();
+    return { invoice, message: messageObj };
   }
 
   public createInvoice(
     invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt' | 'invoiceNumber'> & {
       invoiceNumber?: string;
-    }
+    },
+    businessId: string
   ): Invoice {
     this.ensureInitialized();
-    const count = this.db.invoices.length + 1;
+    const businessInvoices = this.db.invoices.filter((inv) => inv.businessId === businessId);
+    const count = businessInvoices.length + 1;
     const invoiceNumber = invoiceData.invoiceNumber || `INV-2026-${String(count).padStart(3, '0')}`;
     const now = new Date().toISOString();
 
     const newInvoice: Invoice = {
       ...invoiceData,
       id: `inv-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      businessId,
+      payToken: invoiceData.payToken || crypto.randomBytes(16).toString('hex'),
       invoiceNumber,
+      clientMessages: [],
       createdAt: now,
       updatedAt: now,
     };
 
     this.db.invoices.unshift(newInvoice);
-    this.addActivity({
-      invoiceId: newInvoice.id,
-      invoiceNumber: newInvoice.invoiceNumber,
-      action: 'created',
-      description: `Invoice ${newInvoice.invoiceNumber} created for ${newInvoice.clientName} ($${newInvoice.amount.toFixed(2)})`,
-    });
+    this.addActivity(
+      {
+        invoiceId: newInvoice.id,
+        invoiceNumber: newInvoice.invoiceNumber,
+        action: 'created',
+        description: `Invoice ${newInvoice.invoiceNumber} created for ${newInvoice.clientName} ($${newInvoice.amount.toFixed(2)})`,
+      },
+      businessId
+    );
 
     this.persist();
     return newInvoice;
   }
 
-  public updateInvoice(id: string, updates: Partial<Invoice>): Invoice | null {
+  public updateInvoice(id: string, updates: Partial<Invoice>, businessId?: string): Invoice | null {
     this.ensureInitialized();
-    const index = this.db.invoices.findIndex((inv) => inv.id === id);
+    const index = this.db.invoices.findIndex(
+      (inv) => inv.id === id && (!businessId || inv.businessId === businessId)
+    );
     if (index === -1) return null;
 
     const previous = this.db.invoices[index];
+    const targetBusinessId = previous.businessId || businessId || DEMO_BUSINESS_ID;
+
     const updated: Invoice = {
       ...previous,
       ...updates,
+      businessId: targetBusinessId,
       updatedAt: new Date().toISOString(),
     };
 
     this.db.invoices[index] = updated;
 
-    this.addActivity({
-      invoiceId: updated.id,
-      invoiceNumber: updated.invoiceNumber,
-      action: 'edited',
-      description: `Invoice ${updated.invoiceNumber} updated. Status: ${updated.status}`,
-    });
+    this.addActivity(
+      {
+        invoiceId: updated.id,
+        invoiceNumber: updated.invoiceNumber,
+        action: 'edited',
+        description: `Invoice ${updated.invoiceNumber} updated. Status: ${updated.status}`,
+      },
+      targetBusinessId
+    );
 
     this.persist();
     return updated;
   }
 
-  public deleteInvoice(id: string): boolean {
+  public deleteInvoice(id: string, businessId?: string): boolean {
     this.ensureInitialized();
-    const index = this.db.invoices.findIndex((inv) => inv.id === id);
+    const index = this.db.invoices.findIndex(
+      (inv) => inv.id === id && (!businessId || inv.businessId === businessId)
+    );
     if (index === -1) return false;
 
     const deleted = this.db.invoices[index];
+    const targetBusinessId = deleted.businessId || businessId || DEMO_BUSINESS_ID;
     this.db.invoices.splice(index, 1);
 
-    this.addActivity({
-      invoiceId: id,
-      invoiceNumber: deleted.invoiceNumber,
-      action: 'deleted',
-      description: `Invoice ${deleted.invoiceNumber} for ${deleted.clientName} was deleted.`,
-    });
+    this.addActivity(
+      {
+        invoiceId: id,
+        invoiceNumber: deleted.invoiceNumber,
+        action: 'deleted',
+        description: `Invoice ${deleted.invoiceNumber} for ${deleted.clientName} was deleted.`,
+      },
+      targetBusinessId
+    );
 
     this.persist();
     return true;
   }
 
-  public addActivity(entry: Omit<ActivityLogEntry, 'id' | 'timestamp'>): ActivityLogEntry {
+  public addActivity(
+    entry: Omit<ActivityLogEntry, 'id' | 'timestamp'>,
+    businessId: string
+  ): ActivityLogEntry {
     this.ensureInitialized();
     const newLog: ActivityLogEntry = {
       ...entry,
       id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      businessId,
       timestamp: new Date().toISOString(),
     };
 
     this.db.activityLogs.unshift(newLog);
-    // Keep max 200 logs
-    if (this.db.activityLogs.length > 200) {
-      this.db.activityLogs.length = 200;
+    // Keep max 500 logs total
+    if (this.db.activityLogs.length > 500) {
+      this.db.activityLogs.length = 500;
     }
     this.persist();
     return newLog;
   }
 
-  public getActivityLogs(invoiceId?: string): ActivityLogEntry[] {
+  public getActivityLogs(businessId: string, invoiceId?: string): ActivityLogEntry[] {
     this.ensureInitialized();
-    if (invoiceId) {
-      return this.db.activityLogs.filter((log) => log.invoiceId === invoiceId);
-    }
-    return [...this.db.activityLogs];
+    return this.db.activityLogs.filter(
+      (log) => log.businessId === businessId && (!invoiceId || log.invoiceId === invoiceId)
+    );
   }
 
-  public getSummary(): InvoiceSummary {
+  public getSummary(businessId: string): InvoiceSummary {
     this.ensureInitialized();
-    const invoices = this.getInvoices();
+    const invoices = this.getInvoices(businessId);
 
     let totalOutstanding = 0;
     let totalPaid = 0;
@@ -595,33 +886,38 @@ class Storage {
     };
   }
 
-  public getApprovalQueue(status?: 'pending' | 'approved' | 'rejected'): ApprovalDraft[] {
+  public getApprovalQueue(businessId: string, status?: 'pending' | 'approved' | 'rejected'): ApprovalDraft[] {
     this.ensureInitialized();
     if (!this.db.approvalQueue) this.db.approvalQueue = [];
-    if (status) {
-      return this.db.approvalQueue.filter((d) => d.status === status);
-    }
-    return [...this.db.approvalQueue];
+    return this.db.approvalQueue.filter(
+      (d) => d.businessId === businessId && (!status || d.status === status)
+    );
   }
 
-  public getApprovalDraftById(id: string): ApprovalDraft | undefined {
+  public getApprovalDraftById(id: string, businessId?: string): ApprovalDraft | undefined {
     this.ensureInitialized();
     if (!this.db.approvalQueue) this.db.approvalQueue = [];
-    return this.db.approvalQueue.find((d) => d.id === id);
+    return this.db.approvalQueue.find(
+      (d) => d.id === id && (!businessId || d.businessId === businessId)
+    );
   }
 
-  public hasPendingDraftForInvoice(invoiceId: string): boolean {
+  public hasPendingDraftForInvoice(invoiceId: string, businessId: string): boolean {
     this.ensureInitialized();
     if (!this.db.approvalQueue) this.db.approvalQueue = [];
-    return this.db.approvalQueue.some((d) => d.invoiceId === invoiceId && d.status === 'pending');
+    return this.db.approvalQueue.some(
+      (d) => d.invoiceId === invoiceId && d.businessId === businessId && d.status === 'pending'
+    );
   }
 
-  public addApprovalDraft(draft: ApprovalDraft): ApprovalDraft {
+  public addApprovalDraft(draft: ApprovalDraft, businessId: string): ApprovalDraft {
     this.ensureInitialized();
     if (!this.db.approvalQueue) this.db.approvalQueue = [];
+    draft.businessId = businessId;
+
     // Prevent duplicate draft for the same invoice if already pending
     const existingIndex = this.db.approvalQueue.findIndex(
-      (d) => d.invoiceId === draft.invoiceId && d.status === 'pending'
+      (d) => d.invoiceId === draft.invoiceId && d.businessId === businessId && d.status === 'pending'
     );
     if (existingIndex >= 0) {
       return this.db.approvalQueue[existingIndex];
@@ -631,44 +927,50 @@ class Storage {
     return draft;
   }
 
-  public updateApprovalDraft(id: string, updates: Partial<ApprovalDraft>): ApprovalDraft | null {
+  public updateApprovalDraft(id: string, updates: Partial<ApprovalDraft>, businessId?: string): ApprovalDraft | null {
     this.ensureInitialized();
     if (!this.db.approvalQueue) this.db.approvalQueue = [];
-    const index = this.db.approvalQueue.findIndex((d) => d.id === id);
+    const index = this.db.approvalQueue.findIndex(
+      (d) => d.id === id && (!businessId || d.businessId === businessId)
+    );
     if (index === -1) return null;
 
     const updated = {
       ...this.db.approvalQueue[index],
       ...updates,
+      businessId: this.db.approvalQueue[index].businessId || businessId || DEMO_BUSINESS_ID,
     };
     this.db.approvalQueue[index] = updated;
     this.persist();
     return updated;
   }
 
-  public deleteApprovalDraft(id: string): boolean {
+  public deleteApprovalDraft(id: string, businessId?: string): boolean {
     this.ensureInitialized();
     if (!this.db.approvalQueue) this.db.approvalQueue = [];
-    const index = this.db.approvalQueue.findIndex((d) => d.id === id);
+    const index = this.db.approvalQueue.findIndex(
+      (d) => d.id === id && (!businessId || d.businessId === businessId)
+    );
     if (index === -1) return false;
     this.db.approvalQueue.splice(index, 1);
     this.persist();
     return true;
   }
 
-  public getLastAgentRun(): LastAgentRunSummary | undefined {
+  public getLastAgentRun(businessId: string): LastAgentRunSummary | undefined {
     this.ensureInitialized();
-    if (this.db.lastAgentRun) {
-      return this.db.lastAgentRun;
+    if (!this.db.lastAgentRuns) this.db.lastAgentRuns = {};
+    if (this.db.lastAgentRuns[businessId]) {
+      return this.db.lastAgentRuns[businessId];
     }
-    const pending = this.getApprovalQueue('pending');
+    const pending = this.getApprovalQueue(businessId, 'pending');
     if (pending.length > 0) {
       return {
+        businessId,
         timestamp: pending[0].createdAt || new Date().toISOString(),
         overdueCount: pending.length,
         draftsCreatedCount: pending.length,
         draftsReasoning: pending.map((d) => {
-          // Extract short name e.g. "Sam" from "Sam Jenkins" or "Horizon Studio (Liam Chen)" -> "Liam" or "Sam"
           const parenMatch = d.clientName.match(/\((.*?)\)/);
           const rawName = parenMatch ? parenMatch[1] : d.clientName;
           const cleanName = rawName.replace(/^Dr\.\s*/i, '');
@@ -686,9 +988,11 @@ class Storage {
     return undefined;
   }
 
-  public setLastAgentRun(summary: LastAgentRunSummary): void {
+  public setLastAgentRun(businessId: string, summary: LastAgentRunSummary): void {
     this.ensureInitialized();
-    this.db.lastAgentRun = summary;
+    if (!this.db.lastAgentRuns) this.db.lastAgentRuns = {};
+    summary.businessId = businessId;
+    this.db.lastAgentRuns[businessId] = summary;
     this.persist();
   }
 }

@@ -1,3 +1,4 @@
+import { authFetch } from "../lib/api";
 import React, { useState, useEffect } from 'react';
 import {
   X,
@@ -40,7 +41,7 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
       setError(null);
       setDraft(null);
 
-      fetch(`/api/invoices/${invoice.id}/draft-reminder`, {
+      authFetch(`/api/invoices/${invoice.id}/draft-reminder`, {
         method: 'POST',
       })
         .then((res) => {
@@ -69,7 +70,7 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
     setIsSending(true);
     setError(null);
     try {
-      const res = await fetch(`/api/invoices/${invoice.id}/send-reminder`, {
+      const res = await authFetch(`/api/invoices/${invoice.id}/send-reminder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -227,7 +228,7 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
                 <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center justify-between">
                   <span>Message Body</span>
                   <span className="text-[11px] font-normal text-blue-600 flex items-center">
-                    <Sparkles className="w-3 h-3 mr-1" /> Includes Pay now link &amp; terms
+                    <Sparkles className="w-3 h-3 mr-1" /> Includes customer link &amp; terms
                   </span>
                 </label>
                 <textarea
@@ -238,7 +239,7 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
                 />
               </div>
 
-              {/* Pay now link verification preview */}
+              {/* Client link verification preview */}
               <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 flex items-center justify-between">
                 <div className="truncate mr-2">
                   <span className="font-semibold block">Verified Client Payment URL:</span>
@@ -252,7 +253,7 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-md shrink-0 transition-colors"
-                    title="Test Pay now link"
+                    title="Test client link"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </a>

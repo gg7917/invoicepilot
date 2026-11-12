@@ -1,3 +1,4 @@
+import { authFetch } from "./lib/api";
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -18,6 +19,8 @@ import {
   CreditCard,
   Send,
   Bot,
+  Building,
+  LogOut,
 } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { NewInvoice } from './components/NewInvoice';
@@ -28,6 +31,8 @@ import { ReminderModal } from './components/ReminderModal';
 import { ClientReplyModal } from './components/ClientReplyModal';
 import { AskMoneyChat } from './components/AskMoneyChat';
 import { ApprovalQueueView } from './components/ApprovalQueueView';
+import { AuthView } from './components/AuthView';
+import { CustomerPayView } from './components/CustomerPayView';
 import {
   Invoice,
   InvoiceSummary,
@@ -35,6 +40,7 @@ import {
   PayPalConfigStatus,
   ApprovalDraft,
   LastAgentRunSummary,
+  BusinessUser,
 } from '../types/invoice';
 
 export default function App() {
@@ -56,6 +62,52 @@ export default function App() {
     hasGeminiKey: false,
     isSandboxReady: false,
   });
+
+  // Customer Portal Route (/pay/:token, #pay/:token, or ?pay=:token)
+  const [customerPayToken, setCustomerPayToken] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const pathname = window.location.pathname;
+    const match = pathname.match(/^\/pay\/([a-zA-Z0-9_-]+)/);
+    if (match) return match[1];
+    const hashMatch = window.location.hash.match(/^#\/?pay\/([a-zA-Z0-9_-]+)/);
+    if (hashMatch) return hashMatch[1];
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('pay')) return params.get('pay');
+    return null;
+  });
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const pathname = window.location.pathname;
+      const match = pathname.match(/^\/pay\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        setCustomerPayToken(match[1]);
+        return;
+      }
+      const hashMatch = window.location.hash.match(/^#\/?pay\/([a-zA-Z0-9_-]+)/);
+      if (hashMatch) {
+        setCustomerPayToken(hashMatch[1]);
+        return;
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('pay')) {
+        setCustomerPayToken(params.get('pay'));
+        return;
+      }
+      setCustomerPayToken(null);
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<BusinessUser | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Approval Queue State
   const [approvalDrafts, setApprovalDrafts] = useState<ApprovalDraft[]>([]);
@@ -93,10 +145,10 @@ export default function App() {
   const loadData = useCallback(async () => {
     try {
       const [invRes, actRes, cfgRes, queueRes] = await Promise.all([
-        fetch('/api/invoices'),
-        fetch('/api/activity'),
-        fetch('/api/config-status'),
-        fetch('/api/agent/queue'),
+        authFetch('/api/invoices'),
+        authFetch('/api/activity'),
+        authFetch('/api/config-status'),
+        authFetch('/api/agent/queue'),
       ]);
 
       if (invRes.ok) {
@@ -133,7 +185,7 @@ export default function App() {
 
   const loadApprovalQueue = useCallback(async () => {
     try {
-      const res = await fetch('/api/agent/queue');
+      const res = await authFetch('/api/agent/queue');
       if (res.ok) {
         const data = await res.json();
         setApprovalDrafts(data.pendingDrafts || []);
@@ -150,7 +202,7 @@ export default function App() {
   const handleRunAgent = useCallback(async (isAuto = false) => {
     setIsRunningAgent(true);
     try {
-      const res = await fetch('/api/agent/run', { method: 'POST' });
+      const res = await authFetch('/api/agent/run', { method: 'POST' });
       if (!res.ok) {
         throw new Error('Failed to run collections agent');
       }
@@ -180,7 +232,7 @@ export default function App() {
     customDetails?: { subject?: string; body?: string; recipientEmail?: string }
   ) => {
     try {
-      const res = await fetch(`/api/agent/queue/${draftId}/approve`, {
+      const res = await authFetch(`/api/agent/queue/${draftId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(customDetails || {}),
@@ -203,7 +255,7 @@ export default function App() {
   // 1-Click Reject Draft from queue
   const handleRejectDraft = async (draftId: string, reason?: string) => {
     try {
-      const res = await fetch(`/api/agent/queue/${draftId}/reject`, {
+      const res = await authFetch(`/api/agent/queue/${draftId}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reason || 'Dismissed by user' }),
@@ -226,7 +278,7 @@ export default function App() {
   // Update Draft details (inline editing)
   const handleUpdateDraft = async (draftId: string, updates: Partial<ApprovalDraft>) => {
     try {
-      const res = await fetch(`/api/agent/queue/${draftId}`, {
+      const res = await authFetch(`/api/agent/queue/${draftId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -248,7 +300,7 @@ export default function App() {
   // 1-Click Batch Approve All pending drafts
   const handleApproveAllDrafts = async () => {
     try {
-      const res = await fetch('/api/agent/queue/approve-all', { method: 'POST' });
+      const res = await authFetch('/api/agent/queue/approve-all', { method: 'POST' });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Failed to batch approve drafts');
@@ -262,14 +314,80 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-    // Run collections agent automatically once when the app loads
-    if (!hasAutoRunRef.current) {
-      hasAutoRunRef.current = true;
-      handleRunAgent(true);
+  // Auth check on mount
+  const checkAuth = useCallback(async () => {
+    try {
+      // First try standard /api/auth/me (browser may send cookie or interceptor sends token)
+      const res = await authFetch('/api/auth/me');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated && data.business) {
+          if (data.token) {
+            localStorage.setItem('nudgepay_token', data.token);
+          }
+          setCurrentUser(data.business);
+          return data.business;
+        }
+      }
+
+      // If no active session, check if there is a saved token in localStorage
+      const savedToken = localStorage.getItem('nudgepay_token');
+      if (savedToken) {
+        const tokenRes = await authFetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${savedToken}` },
+        });
+        if (tokenRes.ok) {
+          const data = await tokenRes.json();
+          if (data.authenticated && data.business) {
+            setCurrentUser(data.business);
+            return data.business;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to check auth:', err);
+    } finally {
+      setIsCheckingAuth(false);
     }
-  }, [loadData, handleRunAgent]);
+    setCurrentUser(null);
+    return null;
+  }, []);
+
+  useEffect(() => {
+    checkAuth().then((biz) => {
+      if (biz) {
+        loadData();
+        if (!hasAutoRunRef.current) {
+          hasAutoRunRef.current = true;
+          handleRunAgent(true);
+        }
+      }
+    });
+  }, [checkAuth, loadData, handleRunAgent]);
+
+  const handleLogout = async () => {
+    try {
+      await authFetch('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+    localStorage.removeItem('nudgepay_token');
+    setCurrentUser(null);
+    setInvoices([]);
+    setActivityLogs([]);
+    setApprovalDrafts([]);
+    showToast('info', 'Logged out successfully.');
+  };
+
+  const handleLoginSuccess = (user: BusinessUser, token?: string) => {
+    if (token) {
+      localStorage.setItem('nudgepay_token', token);
+    }
+    setCurrentUser(user);
+    loadData();
+    handleRunAgent(true);
+    showToast('success', `Welcome back, ${user.businessName}!`);
+  };
 
   // Refresh PayPal Statuses (Manual click or 30s background auto-sync)
   const refreshInvoiceStatuses = useCallback(async (isBackground = false) => {
@@ -278,7 +396,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/invoices/refresh-status', {
+      const res = await authFetch('/api/invoices/refresh-status', {
         method: 'POST',
       });
 
@@ -302,13 +420,13 @@ export default function App() {
             `Payment received: Invoice ${paidInv.invoiceNumber} ($${paidInv.amount.toFixed(2)} USD) from ${paidInv.clientName} is now Paid!`
           );
         }
-        const actRes = await fetch('/api/activity');
+        const actRes = await authFetch('/api/activity');
         if (actRes.ok) {
           setActivityLogs(await actRes.json());
         }
       } else if (!isBackground) {
         // Re-fetch activity logs on manual refresh
-        const actRes = await fetch('/api/activity');
+        const actRes = await authFetch('/api/activity');
         if (actRes.ok) {
           setActivityLogs(await actRes.json());
         }
@@ -342,14 +460,16 @@ export default function App() {
     }
   }, []);
 
-  // Automatic status updates: every 30 seconds while the app is open
+  // Automatic status updates: every 30 seconds while the app is open and user is logged in
   useEffect(() => {
+    if (!currentUser) return;
+
     const interval = setInterval(() => {
       refreshInvoiceStatuses(true);
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [refreshInvoiceStatuses]);
+  }, [currentUser, refreshInvoiceStatuses]);
 
   // Manual refresh trigger
   const handleRefreshStatus = () => {
@@ -359,7 +479,7 @@ export default function App() {
   // Mark invoice as paid
   const handleMarkPaid = async (id: string) => {
     try {
-      const res = await fetch(`/api/invoices/${id}/mark-paid`, {
+      const res = await authFetch(`/api/invoices/${id}/mark-paid`, {
         method: 'POST',
       });
       if (!res.ok) throw new Error('Failed to update invoice');
@@ -379,7 +499,7 @@ export default function App() {
   const executeApproveAndSend = async (invoice: Invoice) => {
     setIsApproving(true);
     try {
-      const res = await fetch(`/api/invoices/${invoice.id}/approve-and-send`, {
+      const res = await authFetch(`/api/invoices/${invoice.id}/approve-and-send`, {
         method: 'POST',
       });
 
@@ -405,6 +525,28 @@ export default function App() {
     }
   };
 
+  // Dedicated Customer Portal (Public, NO login required, strict single invoice view)
+  if (customerPayToken) {
+    return <CustomerPayView token={customerPayToken} />;
+  }
+
+  // Checking session loading state
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
+        <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center animate-pulse mb-4 shadow-lg shadow-blue-500/20">
+          <Zap className="w-7 h-7 text-white fill-current" />
+        </div>
+        <p className="text-sm font-semibold text-slate-200">Loading NudgePay...</p>
+      </div>
+    );
+  }
+
+  // Unauthenticated view
+  if (!currentUser) {
+    return <AuthView onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Toast Banner */}
@@ -418,7 +560,7 @@ export default function App() {
           <span>{toast.message}</span>
           <button
             onClick={() => setToast(null)}
-            className="ml-3 text-slate-400 hover:text-white"
+            className="ml-3 text-slate-400 hover:text-white cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -436,13 +578,13 @@ export default function App() {
               </div>
               <div>
                 <span className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center">
-                  InvoicePilot
+                  NudgePay
                   <span className="ml-2 px-1.5 py-0.5 text-[10px] uppercase font-bold tracking-wider bg-blue-50 text-blue-700 border border-blue-200 rounded">
                     Collections AI
                   </span>
                 </span>
                 <p className="text-[11px] text-slate-400 hidden sm:block">
-                  AI Collections Agent for Freelancers
+                  The AI collections agent that chases late payments for you
                 </p>
               </div>
             </div>
@@ -519,11 +661,11 @@ export default function App() {
               </button>
             </nav>
 
-            {/* Status Pills & Setup Trigger */}
+            {/* Status Pills & Business Profile Header */}
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setIsGuideOpen(true)}
-                className={`hidden md:inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                className={`hidden lg:inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                   configStatus.isSandboxReady
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/70'
                     : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100/70'
@@ -534,6 +676,25 @@ export default function App() {
                 <span>
                   {configStatus.isSandboxReady ? 'PayPal Sandbox Live' : 'PayPal Sandbox Setup'}
                 </span>
+              </button>
+
+              {/* Business Name Badge */}
+              <div
+                className="flex items-center px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 max-w-[160px] truncate"
+                title={`Logged in as ${currentUser.businessName} (${currentUser.email})`}
+              >
+                <Building className="w-3.5 h-3.5 text-blue-600 mr-1.5 shrink-0" />
+                <span className="truncate">{currentUser.businessName}</span>
+              </div>
+
+              {/* Log out Button */}
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 border border-slate-200 hover:border-red-200 transition-colors cursor-pointer"
+                title="Log out of business account"
+              >
+                <LogOut className="w-3.5 h-3.5 mr-1 text-slate-400 group-hover:text-red-500" />
+                <span>Log out</span>
               </button>
             </div>
           </div>
@@ -721,9 +882,9 @@ export default function App() {
       <footer className="border-t border-slate-200 bg-white py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
           <div className="flex items-center space-x-2">
-            <span className="font-semibold text-slate-700">InvoicePilot</span>
+            <span className="font-semibold text-slate-700">NudgePay</span>
             <span>•</span>
-            <span>Stage 1: AI Parsing &amp; PayPal Sandbox Invoicing</span>
+            <span>The AI collections agent that chases late payments for you</span>
           </div>
           <div className="flex items-center space-x-3">
             <button

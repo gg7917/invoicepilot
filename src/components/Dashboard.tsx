@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DollarSign,
   Clock,
@@ -17,6 +17,10 @@ import {
   MessageSquare,
   Sparkles,
   Bot,
+  MoreHorizontal,
+  Link2,
+  Check,
+  Copy,
 } from 'lucide-react';
 import { Invoice, InvoiceSummary, InvoiceStatus } from '../../types/invoice';
 
@@ -57,6 +61,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | InvoiceStatus>('All');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [copiedInvoiceId, setCopiedInvoiceId] = useState<string | null>(null);
+
+  const handleCopyCustomerLink = (inv: Invoice) => {
+    const token = inv.payToken || inv.id;
+    const url = `${window.location.origin}/pay/${token}`;
+    navigator.clipboard.writeText(url);
+    setCopiedInvoiceId(inv.id);
+    setTimeout(() => {
+      setCopiedInvoiceId((curr) => (curr === inv.id ? null : curr));
+    }, 2500);
+  };
+
+  // Close ⋯ menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.invoice-action-menu')) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   // Filter invoices based on status and search query
   const filteredInvoices = invoices.filter((inv) => {
@@ -376,23 +403,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
 
         {/* Desktop Table View (Hidden on mobile) */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+        <div className="hidden md:block overflow-visible">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="py-3.5 px-6">Client Name</th>
-                <th className="py-3.5 px-4">Description</th>
-                <th className="py-3.5 px-4 text-right">Amount (USD)</th>
-                <th className="py-3.5 px-4">Due Date</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-6 text-right">Actions</th>
+                <th className="py-2.5 px-4 w-5/12">Client &amp; Invoice</th>
+                <th className="py-2.5 px-3 w-2/12">Amount &amp; Due</th>
+                <th className="py-2.5 px-3 w-2/12">Status</th>
+                <th className="py-2.5 px-4 w-3/12 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
-                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <td colSpan={4} className="py-10 text-center text-slate-400">
+                    <FileText className="w-7 h-7 mx-auto mb-2 opacity-40" />
                     <p className="font-medium text-slate-600">No invoices match your filter</p>
                     <p className="text-xs text-slate-400 mt-0.5">
                       Try searching for a different client or clear filters.
@@ -400,64 +425,77 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredInvoices.map((inv) => {
-                  const today = new Date().toISOString().split('T')[0];
-                  const isPastDue =
-                    (inv.status === 'Sent' || inv.status === 'Overdue') && inv.dueDate < today;
-
+                filteredInvoices.map((inv, index) => {
                   return (
                     <tr
                       key={inv.id}
                       className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
                       onClick={() => onSelectInvoice(inv)}
                     >
-                      <td className="py-4 px-6">
-                        <div className="font-semibold text-slate-900 flex items-center">
-                          <span>{inv.clientName}</span>
+                      {/* Client name, invoice number, and email merged into one cell with wrapping */}
+                      <td className="py-2.5 px-4 max-w-[280px]">
+                        <div className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight flex items-center flex-wrap gap-1">
+                          <span className="break-words">{inv.clientName}</span>
                           {inv.isDemo && (
-                            <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200">
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200 shrink-0">
                               Demo
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-slate-400 font-mono flex items-center space-x-1.5 mt-0.5">
+                        <div className="text-[11px] text-slate-500 font-mono mt-0.5 break-words">
                           <span>{inv.invoiceNumber}</span>
                           {inv.clientEmail && (
                             <>
-                              <span>•</span>
-                              <span className="truncate max-w-[180px]">{inv.clientEmail}</span>
+                              <span className="text-slate-300 mx-1">•</span>
+                              <span className="text-slate-500">{inv.clientEmail}</span>
                             </>
                           )}
                         </div>
+                        {inv.description && (
+                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 break-words">
+                            {inv.description}
+                          </p>
+                        )}
+                        {((inv.clientMessages && inv.clientMessages.length > 0) || inv.rawClientMessage) && (
+                          <div className="mt-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onClientReply(inv);
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-200 transition-colors"
+                              title="Customer message received via payment portal"
+                            >
+                              <MessageSquare className="w-2.5 h-2.5 text-purple-600" />
+                              <span>Client message • Review reply</span>
+                            </button>
+                          </div>
+                        )}
                       </td>
 
-                      <td className="py-4 px-4 max-w-xs">
-                        <div className="text-slate-700 truncate font-medium">{inv.description}</div>
-                        <div className="text-xs text-slate-400">
-                          {inv.lineItems.length} line item{inv.lineItems.length === 1 ? '' : 's'}
-                          {inv.remindersCount ? ` • ${inv.remindersCount} reminder sent` : ''}
+                      {/* Merged Amount & Due date compact column */}
+                      <td className="py-2.5 px-3 whitespace-nowrap">
+                        <div className="font-bold text-slate-900 text-xs sm:text-sm">
+                          ${inv.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">
+                          Due: {formatDueDate(inv.dueDate, inv.status)}
                         </div>
                       </td>
 
-                      <td className="py-4 px-4 text-right font-bold text-slate-900">
-                        ${inv.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        {formatDueDate(inv.dueDate, inv.status)}
-                      </td>
-
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <div className="space-y-1">
+                      {/* Status column with small PayPal status text underneath */}
+                      <td className="py-2.5 px-3 whitespace-nowrap">
+                        <div className="space-y-0.5">
                           {getStatusBadge(inv.status)}
                           {inv.rawPayPalStatus && (
-                            <span className="text-[11px] text-slate-400 block font-mono">
+                            <span className="text-[10px] text-slate-400 block font-mono">
                               PayPal: {inv.rawPayPalStatus}
                             </span>
                           )}
                           {inv.lastSyncError && (
                             <span
-                              className="text-[11px] text-rose-600 block font-medium max-w-[160px] truncate"
+                              className="text-[10px] text-rose-600 block font-medium max-w-[130px] truncate"
                               title={inv.lastSyncError}
                             >
                               {inv.lastSyncError}
@@ -466,94 +504,150 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         </div>
                       </td>
 
+                      {/* Actions: Approve & Send / Copy customer link + ⋯ dropdown menu */}
                       <td
-                        className="py-4 px-6 text-right whitespace-nowrap"
+                        className="py-2.5 px-4 text-right whitespace-nowrap"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="flex items-center justify-end space-x-2">
-                          {inv.status === 'Draft' ? (
+                        <div className="flex items-center justify-end space-x-1.5 invoice-action-menu relative">
+                          {inv.status === 'Draft' && (
                             <button
                               onClick={() => onApproveAndSend(inv)}
-                              className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors"
+                              className="inline-flex items-center px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors shrink-0"
+                              title="Approve & Send via PayPal Sandbox"
                             >
                               <Send className="w-3 h-3 mr-1" />
-                              Approve &amp; Send
-                            </button>
-                          ) : null}
-
-                          {/* Overdue Draft reminder button */}
-                          {isPastDue && (
-                            <button
-                              onClick={() => onDraftReminder(inv)}
-                              className="inline-flex items-center px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-semibold shadow-2xs transition-colors"
-                              title="Draft AI overdue reminder email"
-                            >
-                              <Mail className="w-3.5 h-3.5 mr-1 text-amber-600" />
-                              <span>Draft reminder</span>
+                              <span>Approve &amp; Send</span>
                             </button>
                           )}
 
-                          {/* Client reply assistant */}
-                          <button
-                            onClick={() => onClientReply(inv)}
-                            className="p-1.5 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors border border-transparent hover:border-purple-200"
-                            title="Paste Client Reply & Negotiate Terms"
-                          >
-                            <MessageSquare className="w-4 h-4" />
-                          </button>
-
-                          {/* Pay now (client view) */}
-                          {inv.paypalPaymentLink ? (
-                            <a
-                              href={inv.paypalPaymentLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition-colors shadow-2xs"
-                              title="Direct recipient checkout link (Sandbox)"
-                            >
-                              <span>Pay now (client view)</span>
-                              <ExternalLink className="w-3.5 h-3.5 ml-1" />
-                            </a>
-                          ) : inv.status !== 'Draft' ? (
-                            <span
-                              className="inline-flex items-center px-2 py-1 text-[11px] text-slate-400 bg-slate-100/80 rounded-md border border-slate-200"
-                              title="Payment link is not available. Connect PayPal Sandbox credentials in Settings > Secrets to generate live sandbox links."
-                            >
-                              Link unavailable
-                            </span>
-                          ) : null}
-
-                          {/* View in PayPal (Seller link) */}
-                          {inv.paypalSellerLink ? (
-                            <a
-                              href={inv.paypalSellerLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-medium transition-colors"
-                              title="Open seller invoice in PayPal Sandbox"
-                            >
-                              <span>View in PayPal</span>
-                              <ExternalLink className="w-3 h-3 ml-1 text-slate-400" />
-                            </a>
-                          ) : null}
-
-                          {(inv.status === 'Sent' || inv.status === 'Overdue') && (
+                          {/* Copy Customer Link Button (shown for any sent/processed invoice) */}
+                          {inv.status !== 'Draft' && (
                             <button
-                              onClick={() => onMarkPaid(inv.id)}
-                              className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-200"
-                              title="Mark as Paid"
+                              type="button"
+                              onClick={() => handleCopyCustomerLink(inv)}
+                              className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs transition-colors shrink-0"
+                              title="Copy customer payment link"
                             >
-                              <CheckCircle2 className="w-4 h-4" />
+                              {copiedInvoiceId === inv.id ? (
+                                <>
+                                  <Check className="w-3 h-3 mr-1 text-emerald-600" />
+                                  <span className="text-emerald-700 font-semibold">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Link2 className="w-3 h-3 mr-1 text-indigo-600" />
+                                  <span>Copy link</span>
+                                </>
+                              )}
                             </button>
                           )}
 
-                          <button
-                            onClick={() => onSelectInvoice(inv)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                            title="View Invoice Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                          {/* ⋯ Menu Button */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setOpenMenuId(openMenuId === inv.id ? null : inv.id)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                              title="More actions"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {openMenuId === inv.id && (
+                              <div
+                                className={`absolute right-0 ${
+                                  index >= filteredInvoices.length - 2 ? 'bottom-full mb-1' : 'top-full mt-1'
+                                } w-44 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-30 animate-in fade-in zoom-in-95 text-left font-normal`}
+                              >
+                                <button
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    onSelectInvoice(inv);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 transition-colors cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>Details</span>
+                                </button>
+
+                                {inv.status !== 'Draft' && (
+                                  <button
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      handleCopyCustomerLink(inv);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-xs text-indigo-700 hover:bg-indigo-50 flex items-center space-x-2 transition-colors cursor-pointer"
+                                  >
+                                    <Link2 className="w-3.5 h-3.5 text-indigo-600" />
+                                    <span>Copy customer link</span>
+                                  </button>
+                                )}
+
+                                {inv.paypalSellerLink && (
+                                  <a
+                                    href={inv.paypalSellerLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => setOpenMenuId(null)}
+                                    className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 transition-colors"
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>View in PayPal</span>
+                                  </a>
+                                )}
+
+                                <button
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    onDraftReminder(inv);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 transition-colors cursor-pointer"
+                                >
+                                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>Draft reminder</span>
+                                </button>
+
+                                {inv.status !== 'Paid' && (
+                                  <button
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      onMarkPaid(inv.id);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-50 flex items-center space-x-2 transition-colors cursor-pointer"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>Mark as paid</span>
+                                  </button>
+                                )}
+
+                                <button
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    onClientReply(inv);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-xs text-purple-700 hover:bg-purple-50 flex items-center space-x-2 transition-colors cursor-pointer"
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5 text-purple-500" />
+                                  <span>Paste client reply</span>
+                                </button>
+
+                                {inv.status === 'Draft' && (
+                                  <button
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      onApproveAndSend(inv);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-xs text-blue-700 hover:bg-blue-50 flex items-center space-x-2 transition-colors cursor-pointer"
+                                  >
+                                    <Send className="w-3.5 h-3.5 text-blue-600" />
+                                    <span>Approve &amp; Send</span>
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -564,128 +658,220 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </table>
         </div>
 
-        {/* Mobile Cards View (Visible on small screens) */}
-        <div className="md:hidden divide-y divide-slate-100">
+        {/* Mobile Cards View (Visible on screens under 768px) */}
+        <div className="md:hidden p-3.5 space-y-3 bg-slate-50/50">
           {filteredInvoices.length === 0 ? (
-            <div className="py-8 text-center text-slate-400 text-xs">
+            <div className="py-8 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200 p-6">
               No matching invoices found.
             </div>
           ) : (
             filteredInvoices.map((inv) => {
-              const today = new Date().toISOString().split('T')[0];
-              const isPastDue =
-                (inv.status === 'Sent' || inv.status === 'Overdue') && inv.dueDate < today;
-
               return (
                 <div
                   key={inv.id}
-                  className="p-4 space-y-3 hover:bg-slate-50/50"
+                  className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-2.5 hover:border-slate-300 transition-all cursor-pointer relative"
                   onClick={() => onSelectInvoice(inv)}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="font-semibold text-slate-900 text-sm flex items-center">
-                        <span>{inv.clientName}</span>
+                  {/* Card Top: Client & Status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-slate-900 text-sm leading-tight flex items-center flex-wrap gap-1">
+                        <span className="break-words">{inv.clientName}</span>
                         {inv.isDemo && (
-                          <span className="ml-1.5 px-1 py-0.2 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-800">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200 shrink-0">
                             Demo
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-slate-400 font-mono">{inv.invoiceNumber}</div>
-                    </div>
-                    <div className="text-right space-y-1">
-                      <div className="font-bold text-slate-900 text-sm">
-                        ${inv.amount.toFixed(2)}
+                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 break-words">
+                        <span>{inv.invoiceNumber}</span>
+                        {inv.clientEmail && (
+                          <>
+                            <span className="text-slate-300 mx-1">•</span>
+                            <span>{inv.clientEmail}</span>
+                          </>
+                        )}
                       </div>
+                      {((inv.clientMessages && inv.clientMessages.length > 0) || inv.rawClientMessage) && (
+                        <div className="mt-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onClientReply(inv);
+                            }}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-200 transition-colors"
+                          >
+                            <MessageSquare className="w-2.5 h-2.5 text-purple-600" />
+                            <span>Client message • Review</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
                       {getStatusBadge(inv.status)}
                       {inv.rawPayPalStatus && (
-                        <span className="text-[11px] text-slate-400 block font-mono">
+                        <span className="text-[10px] text-slate-400 block font-mono mt-0.5">
                           PayPal: {inv.rawPayPalStatus}
-                        </span>
-                      )}
-                      {inv.lastSyncError && (
-                        <span
-                          className="text-[11px] text-rose-600 block font-medium max-w-[160px] truncate"
-                          title={inv.lastSyncError}
-                        >
-                          {inv.lastSyncError}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 line-clamp-1">{inv.description}</p>
+                  {/* Description */}
+                  {inv.description && (
+                    <p className="text-xs text-slate-600 line-clamp-2 break-words">
+                      {inv.description}
+                    </p>
+                  )}
 
-                  <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
-                    <div className="text-slate-500">
-                      Due: {formatDueDate(inv.dueDate, inv.status)}
+                  {/* Card Bottom: Amount & Due, and Actions (Pay now + ⋯ menu) */}
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                    <div>
+                      <div className="font-bold text-slate-900 text-sm">
+                        ${inv.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Due: {formatDueDate(inv.dueDate, inv.status)}
+                      </div>
                     </div>
+
                     <div
-                      className="flex flex-wrap items-center justify-end gap-1.5"
+                      className="flex items-center space-x-1.5 invoice-action-menu relative"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {inv.status === 'Draft' && (
                         <button
                           onClick={() => onApproveAndSend(inv)}
-                          className="px-2.5 py-1 bg-blue-600 text-white rounded-md text-xs font-semibold"
+                          className="inline-flex items-center px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors shrink-0"
                         >
-                          Approve &amp; Send
+                          <Send className="w-3 h-3 mr-1" />
+                          <span>Approve &amp; Send</span>
                         </button>
                       )}
 
-                      {isPastDue && (
+                      {/* Copy Customer Link Button */}
+                      {inv.status !== 'Draft' && (
                         <button
-                          onClick={() => onDraftReminder(inv)}
-                          className="px-2 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-md text-xs font-semibold inline-flex items-center"
+                          type="button"
+                          onClick={() => handleCopyCustomerLink(inv)}
+                          className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs transition-colors shrink-0"
+                          title="Copy customer payment link"
                         >
-                          <Mail className="w-3 h-3 mr-1 text-amber-600" />
-                          Reminder
+                          {copiedInvoiceId === inv.id ? (
+                            <>
+                              <Check className="w-3 h-3 mr-1 text-emerald-600" />
+                              <span className="text-emerald-700 font-semibold">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Link2 className="w-3 h-3 mr-1 text-indigo-600" />
+                              <span>Copy link</span>
+                            </>
+                          )}
                         </button>
                       )}
 
-                      <button
-                        onClick={() => onClientReply(inv)}
-                        className="p-1 text-purple-600 hover:bg-purple-50 rounded"
-                        title="Client Reply Assistant"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                      </button>
-
-                      {inv.paypalPaymentLink ? (
-                        <a
-                          href={inv.paypalPaymentLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-xs font-semibold inline-flex items-center"
+                      {/* ⋯ Menu */}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setOpenMenuId(openMenuId === `mob-${inv.id}` ? null : `mob-${inv.id}`)}
+                          className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                          title="More actions"
                         >
-                          Pay now (client view)
-                          <ExternalLink className="w-3 h-3 ml-1" />
-                        </a>
-                      ) : inv.status !== 'Draft' ? (
-                        <span className="text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                          Link unavailable
-                        </span>
-                      ) : null}
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
 
-                      {inv.paypalSellerLink && (
-                        <a
-                          href={inv.paypalSellerLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2 py-1 bg-slate-50 text-slate-600 border border-slate-200 rounded-md text-xs font-medium inline-flex items-center"
-                        >
-                          View in PayPal
-                          <ExternalLink className="w-3 h-3 ml-1 text-slate-400" />
-                        </a>
-                      )}
-                      <button
-                        onClick={() => onSelectInvoice(inv)}
-                        className="text-slate-400 hover:text-slate-700 p-1"
-                        title="View Details"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
+                        {openMenuId === `mob-${inv.id}` && (
+                          <div className="absolute right-0 bottom-full mb-1 w-44 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-30 animate-in fade-in zoom-in-95 text-left font-normal">
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                onSelectInvoice(inv);
+                              }}
+                              className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Details</span>
+                            </button>
+
+                            {inv.status !== 'Draft' && (
+                              <button
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  handleCopyCustomerLink(inv);
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-indigo-700 hover:bg-indigo-50 flex items-center space-x-2 transition-colors cursor-pointer"
+                              >
+                                <Link2 className="w-3.5 h-3.5 text-indigo-600" />
+                                <span>Copy customer link</span>
+                              </button>
+                            )}
+
+                            {inv.paypalSellerLink && (
+                              <a
+                                href={inv.paypalSellerLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setOpenMenuId(null)}
+                                className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 transition-colors"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                                <span>View in PayPal</span>
+                              </a>
+                            )}
+
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                onDraftReminder(inv);
+                              }}
+                              className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 transition-colors"
+                            >
+                              <Mail className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Draft reminder</span>
+                            </button>
+
+                            {inv.status !== 'Paid' && (
+                              <button
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  onMarkPaid(inv.id);
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-50 flex items-center space-x-2 transition-colors"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Mark as paid</span>
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                onClientReply(inv);
+                              }}
+                              className="w-full px-3 py-1.5 text-xs text-purple-700 hover:bg-purple-50 flex items-center space-x-2 transition-colors"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-purple-500" />
+                              <span>Paste client reply</span>
+                            </button>
+
+                            {inv.status === 'Draft' && (
+                              <button
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  onApproveAndSend(inv);
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-blue-700 hover:bg-blue-50 flex items-center space-x-2 transition-colors"
+                              >
+                                <Send className="w-3.5 h-3.5 text-blue-600" />
+                                <span>Approve &amp; Send</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

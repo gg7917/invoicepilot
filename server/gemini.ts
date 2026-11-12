@@ -17,7 +17,7 @@ interface ExtractionResult extends ExtractedInvoiceData {
  * Smart heuristic fallback parser if Gemini API encounters temporary network issues,
  * model demand spikes (503), or invalid API keys.
  */
-function heuristicExtract(messageText: string, referenceDateStr?: string): ExtractedInvoiceData {
+export function heuristicExtract(messageText: string, referenceDateStr?: string): ExtractedInvoiceData {
   const today = referenceDateStr || new Date().toISOString().split('T')[0];
   const refDate = new Date(today);
 
@@ -179,7 +179,7 @@ export async function extractInvoiceFromMessage(
     },
   });
 
-  const systemInstruction = `You are InvoicePilot AI, an expert collections and invoicing extraction agent for freelancers and businesses.
+  const systemInstruction = `You are NudgePay AI, an expert collections and invoicing extraction agent for freelancers and businesses.
 Your job is to read raw client messages, emails, chats, or project briefs, and extract structured invoice details.
 
 Reference Date Today: ${today}
@@ -203,8 +203,10 @@ Rules:
 7. Extract any helpful notes (payment terms, delivery terms, instructions).
 Be thorough, accurate, and output strictly valid JSON conforming to the schema.`;
 
-  // Official models from @google/genai guidelines in order of priority
-  const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+  // Official models from @google/genai guidelines in order of priority:
+  // Primary: gemini-3.8-flash with adequate time window
+  // Secondary: gemini-3.1-flash-lite with minimal thinking latency
+  const candidateModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
 
   let lastError: any = null;
 
@@ -264,8 +266,8 @@ Be thorough, accurate, and output strictly valid JSON conforming to the schema.`
         config.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
       }
 
-      // Fast per-model timeout (8s for primary, 5s for fallback) to prevent stalls
-      const timeoutMs = model === 'gemini-3.8-flash' ? 8000 : 5000;
+      // 12s for primary model, 6s for high-speed flash lite
+      const timeoutMs = model === 'gemini-3.8-flash' ? 12000 : 6000;
 
       const generatePromise = ai.models.generateContent({
         model,
@@ -344,7 +346,8 @@ Be thorough, accurate, and output strictly valid JSON conforming to the schema.`
  */
 export async function generateOverdueReminder(
   invoice: Invoice,
-  referenceDateStr?: string
+  referenceDateStr?: string,
+  baseUrl?: string
 ): Promise<ReminderDraft> {
   const today = referenceDateStr || new Date().toISOString().split('T')[0];
   const refTime = new Date(today).getTime();
@@ -362,6 +365,10 @@ export async function generateOverdueReminder(
     toneLabel = 'Firm Follow-up (8–21 days overdue)';
   }
 
+  const customerLink = invoice.payToken
+    ? `${(baseUrl || '').replace(/\/$/, '')}/pay/${invoice.payToken}`
+    : `${(baseUrl || '').replace(/\/$/, '')}/pay/${invoice.id}`;
+
   const paymentLink =
     invoice.paypalPaymentLink ||
     `https://www.sandbox.paypal.com/invoice/p/#${invoice.invoiceNumber.replace(/[^A-Za-z0-9]/g, '')}`;
@@ -373,13 +380,13 @@ export async function generateOverdueReminder(
 
     if (tone === 'friendly') {
       subject = `Friendly reminder: Invoice ${invoice.invoiceNumber} ($${invoice.amount.toFixed(2)}) is past due`;
-      body = `Hi ${invoice.clientName},\n\nHope you're having a productive week! Just a friendly reminder that Invoice ${invoice.invoiceNumber} for $${invoice.amount.toFixed(2)} was due on ${invoice.dueDate} (${daysOverdue} day${daysOverdue === 1 ? '' : 's'} ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\n${paymentLink}\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts`;
+      body = `Hi ${invoice.clientName},\n\nHope you're having a productive week! Just a friendly reminder that Invoice ${invoice.invoiceNumber} for $${invoice.amount.toFixed(2)} was due on ${invoice.dueDate} (${daysOverdue} day${daysOverdue === 1 ? '' : 's'} ago).\n\nYou can view your invoice, pay instantly, or message us directly at your customer link:\n${customerLink}\n\nDirect PayPal payment link:\n${paymentLink}\n\nIf you've already sent payment, please disregard this note. Let me know if you have any questions!\n\nBest regards,\nNudgePay Accounts`;
     } else if (tone === 'firm') {
       subject = `Urgent: Overdue payment for Invoice ${invoice.invoiceNumber} ($${invoice.amount.toFixed(2)})`;
-      body = `Dear ${invoice.clientName},\n\nWe are following up regarding Invoice ${invoice.invoiceNumber} for the amount of $${invoice.amount.toFixed(2)}, which was due on ${invoice.dueDate} and is now ${daysOverdue} days overdue.\n\nPlease review the invoice and complete payment as soon as possible via the PayPal link below:\n${paymentLink}\n\nIf there is an issue or you need to discuss payment scheduling, please reply to this email immediately so we can coordinate.\n\nSincerely,\nFinance & Collections Team`;
+      body = `Dear ${invoice.clientName},\n\nWe are following up regarding Invoice ${invoice.invoiceNumber} for the amount of $${invoice.amount.toFixed(2)}, which was due on ${invoice.dueDate} and is now ${daysOverdue} days overdue.\n\nPlease review your invoice and submit payment or message us directly via your customer payment portal:\n${customerLink}\n\nDirect PayPal payment link:\n${paymentLink}\n\nIf there is an issue or you need to discuss payment scheduling, please message us through the link above immediately.\n\nSincerely,\nFinance & Collections Team`;
     } else {
       subject = `FINAL NOTICE: Immediate payment required for Invoice ${invoice.invoiceNumber} ($${invoice.amount.toFixed(2)})`;
-      body = `Dear ${invoice.clientName},\n\nThis is a FINAL NOTICE regarding outstanding Invoice ${invoice.invoiceNumber} in the amount of $${invoice.amount.toFixed(2)}, which became due on ${invoice.dueDate} and is now ${daysOverdue} days past due.\n\nServices and deliverables have been rendered in full. Please settle this balance immediately to prevent account suspension or collection escalation:\n\nDirect PayPal Payment Link:\n${paymentLink}\n\nPlease confirm payment by replying with transaction confirmation.\n\nAccounts Receivable`;
+      body = `Dear ${invoice.clientName},\n\nThis is a FINAL NOTICE regarding outstanding Invoice ${invoice.invoiceNumber} in the amount of $${invoice.amount.toFixed(2)}, which became due on ${invoice.dueDate} and is now ${daysOverdue} days past due.\n\nPlease settle this balance immediately via your customer payment portal:\n${customerLink}\n\nDirect PayPal Link:\n${paymentLink}\n\nServices and deliverables have been rendered in full. Please confirm payment or contact us through your portal today.\n\nAccounts Receivable`;
     }
 
     return {
@@ -419,10 +426,12 @@ export async function generateOverdueReminder(
   * "friendly": (1-7 days overdue) Gentle, warm, assuming it was simply overlooked.
   * "firm": (8-21 days overdue) Professional, direct, asking for payment date or update.
   * "final": (22+ days overdue) Formal notice, explicit final call before suspension/collections.
-- Payment Link to include verbatim in email body: ${paymentLink}
+- Customer Payment Link (MUST be included verbatim in email body): ${customerLink}
+- Direct PayPal Payment Link: ${paymentLink}
 
 Requirements:
-- Must include the client name, amount, due date, and the exact Pay now link.
+- Must include the client name, amount, due date, and the customer payment link (${customerLink}).
+- Mention that the client can pay online or message the business directly through that customer link.
 - Return subject and body. Keep the email concise and ready to send.`;
 
     const generatePromise = ai.models.generateContent({
@@ -520,7 +529,7 @@ export async function analyzeClientReply(
         : suggestedDueDate
         ? `We have updated your invoice due date to ${suggestedDueDate}. Please ensure the balance ($${invoice.amount.toFixed(2)}) is settled by then via PayPal.`
         : `Thank you for your note regarding Invoice ${invoice.invoiceNumber}. Please let us know the exact date you anticipate completing the payment so we can update our records.`
-    }\n\nBest regards,\nInvoicePilot Accounts`;
+    }\n\nBest regards,\nNudgePay Accounts`;
 
     return {
       invoiceId: invoice.id,
@@ -980,7 +989,7 @@ export async function askFinancialAdvisor(
     });
 
     // 2. Verbatim system instruction requested by user
-    const systemInstruction = `You are "Ask Your Money", an intelligent financial analyst agent for InvoicePilot.
+    const systemInstruction = `You are "Ask Your Money", an intelligent financial analyst agent for NudgePay.
 Reference Date (Today): ${today}
 
 Answer only from the invoice data provided. If the user asks about a client, date range or fact that is not in the data, say clearly that you have no matching records (for example: 'I don't see any invoices for Priya') and do not substitute a different figure. Never invent invoices, clients, amounts or dates. If the question is ambiguous, ask a short clarifying question.

@@ -1,9 +1,19 @@
 {
   "invoices": [
     {
+      "id": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "businessId": "biz-demo-001",
       "clientName": "Sarah Jenkins Design",
       "clientEmail": "sarah.j@example.com",
       "description": "Brand identity and logo package",
+      "amount": 375,
+      "currency": "USD",
+      "issueDate": "2026-11-09",
+      "dueDate": "2026-11-20",
+      "status": "Sent",
+      "notes": "Thanks for working with us! Dispatched via PayPal Sandbox.",
+      "rawClientMessage": "Hi! Can I pay half this Friday and the rest next month?",
       "lineItems": [
         {
           "id": "item-1",
@@ -14,135 +24,32 @@
         },
         {
           "id": "item-2",
-          "name": "Social Banner",
+          "name": "Social Media Banner Kit",
           "quantity": 1,
           "unitPrice": 75,
           "total": 75
         }
       ],
-      "amount": 375,
-      "currency": "USD",
-      "issueDate": "2026-11-09",
-      "dueDate": "2026-11-20",
-      "status": "Sent",
-      "notes": "Thanks for working with us!",
-      "rawClientMessage": "",
-      "id": "inv-1794230860486-55kpj",
-      "invoiceNumber": "INV-2026-012",
       "createdAt": "2026-11-09T13:27:40.486Z",
-      "updatedAt": "2026-11-09T14:16:41.914Z",
+      "updatedAt": "2026-11-11T14:20:00.504Z",
       "paypalInvoiceId": "INV2-QAC8-RQG6-E2DC-ZG6Q",
       "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#QAC8RQG6E2DCZG6Q",
       "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-QAC8-RQG6-E2DC-ZG6Q",
-      "rawPayPalStatus": "SENT"
-    },
-    {
-      "clientName": "Ravi",
-      "clientEmail": "ravi@example.com",
-      "description": "3 Logo Designs and a Banner",
-      "lineItems": [
+      "rawPayPalStatus": "Sent",
+      "payToken": "b7aeaff6bb6694feac4dd58a76faf514",
+      "clientMessages": [
         {
-          "id": "item-1794208849547-0",
-          "name": "Logo Designs",
-          "description": "3 logo designs",
-          "quantity": 3,
-          "unitPrice": 100,
-          "total": 300
-        },
-        {
-          "id": "item-1794208849547-1",
-          "name": "Banner Design",
-          "description": "1 banner design",
-          "quantity": 1,
-          "unitPrice": 100,
-          "total": 100
+          "id": "msg-1794406800504-153p2",
+          "message": "Hi! Can I pay half this Friday and the rest next month?",
+          "timestamp": "2026-11-11T14:20:00.504Z",
+          "sender": "client"
         }
-      ],
-      "amount": 400,
-      "currency": "USD",
-      "issueDate": "2026-11-09",
-      "dueDate": "2026-11-19",
-      "status": "Draft",
-      "notes": "Due in 10 days",
-      "rawClientMessage": "Hi, I need 3 logo designs and a banner, $400 total. Please send the invoice, due in 10 days. - Ravi (ravi@example.com)",
-      "id": "inv-1794209458101-0wrct",
-      "invoiceNumber": "INV-2026-006",
-      "createdAt": "2026-11-09T07:30:58.101Z",
-      "updatedAt": "2026-11-09T14:16:43.269Z",
-      "paypalInvoiceId": "INV2-9N4L-G8J9-K3XG-VCRD",
-      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#9N4LG8J9K3XGVCRD",
-      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-9N4L-G8J9-K3XG-VCRD",
-      "rawPayPalStatus": "DRAFT"
-    },
-    {
-      "id": "inv-1001",
-      "invoiceNumber": "INV-2026-001",
-      "clientName": "Apex Creative Labs (Ravi Sharma)",
-      "clientEmail": "ravi@apexcreative.io",
-      "description": "Brand Identity & 3 Logo Concepts + Social Media Banner Kit",
-      "amount": 400,
-      "currency": "USD",
-      "issueDate": "2026-11-08",
-      "dueDate": "2026-11-18",
-      "status": "Paid",
-      "rawClientMessage": "Hi, I need 3 logo designs and a banner, $400 total, can you send the invoice, due in 10 days. - Ravi (ravi@apexcreative.io)",
-      "notes": "Payment terms: Due in 10 days via PayPal Sandbox. Final vector SVG & PNG delivered upon payment approval.",
-      "lineItems": [
-        {
-          "id": "li-1",
-          "name": "Brand Identity & Logo Concepts",
-          "description": "3 custom vector logo proposals with monochrome & full color variants",
-          "quantity": 3,
-          "unitPrice": 100,
-          "total": 300
-        },
-        {
-          "id": "li-2",
-          "name": "Social Media Banner Kit",
-          "description": "High-res banners formatted for Twitter/X, LinkedIn, and YouTube",
-          "quantity": 1,
-          "unitPrice": 100,
-          "total": 100
-        }
-      ],
-      "createdAt": "2026-11-08T09:15:00.000Z",
-      "updatedAt": "2026-11-11T04:13:00.462Z",
-      "paypalInvoiceId": "INV2-M2EB-VXE6-XJZM-EY5J",
-      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#M2EBVXE6XJZMEY5J",
-      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-M2EB-VXE6-XJZM-EY5J",
-      "rawPayPalStatus": "PAID"
-    },
-    {
-      "id": "inv-1002",
-      "invoiceNumber": "INV-2026-002",
-      "clientName": "CloudScale Systems (Sarah Jenkins)",
-      "clientEmail": "sarah.j@cloudscale.net",
-      "description": "Full-Stack API Integration & Microservices Security Audit (40 hrs)",
-      "amount": 3200,
-      "currency": "USD",
-      "issueDate": "2026-10-22",
-      "dueDate": "2026-11-05",
-      "status": "Overdue",
-      "rawClientMessage": "Please invoice for sprint 4 microservices audit 40 hrs at $80/hr. Thanks Sarah.",
-      "notes": "Overdue since November 5th. Reminder notification pending collections sequence.",
-      "lineItems": [
-        {
-          "id": "li-3",
-          "name": "Backend API Audit & Performance Profiling",
-          "description": "40 billable engineering hours on distributed cache & auth gateway",
-          "quantity": 40,
-          "unitPrice": 80,
-          "total": 3200
-        }
-      ],
-      "createdAt": "2026-10-22T14:30:00.000Z",
-      "updatedAt": "2026-11-10T14:16:46.478Z",
-      "lastReminderSentAt": "2026-11-10T14:16:46.476Z",
-      "remindersCount": 1
+      ]
     },
     {
       "id": "inv-1003",
       "invoiceNumber": "INV-2026-003",
+      "businessId": "biz-demo-001",
       "clientName": "Nordic Wellness Co. (Elin Larsson)",
       "clientEmail": "finance@nordicwellness.se",
       "description": "E-commerce Shopify Theme Customization & Mobile Checkout UX",
@@ -150,9 +57,9 @@
       "currency": "USD",
       "issueDate": "2026-11-02",
       "dueDate": "2026-11-20",
-      "status": "Sent",
+      "status": "Paid",
       "rawClientMessage": "Invoice for mobile checkout optimization ($1,450) with net 18 terms. Send to Elin Larsson.",
-      "notes": "Ready for PayPal Sandbox Invoicing API dispatch.",
+      "notes": "Dispatched via PayPal Sandbox Invoicing API.",
       "lineItems": [
         {
           "id": "li-4",
@@ -164,11 +71,191 @@
         }
       ],
       "createdAt": "2026-11-02T11:00:00.000Z",
-      "updatedAt": "2026-11-02T11:05:00.000Z"
+      "updatedAt": "2026-11-11T14:08:09.487Z",
+      "paypalInvoiceId": "INV2-ZRJW-LAF5-82KE-WCBL",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#ZRJWLAF582KEWCBL",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-ZRJW-LAF5-82KE-WCBL",
+      "rawPayPalStatus": "PAID",
+      "payToken": "ad6081b1878f4331a2a00ea7f3d5b894"
+    },
+    {
+      "id": "inv-1001",
+      "invoiceNumber": "INV-2026-001",
+      "businessId": "biz-demo-001",
+      "clientName": "Apex Creative Labs (Ravi Sharma)",
+      "clientEmail": "ravi@apexcreative.io",
+      "description": "Brand Identity & 3 Logo Concepts + Social Media Banner Kit",
+      "amount": 400,
+      "currency": "USD",
+      "issueDate": "2026-11-08",
+      "dueDate": "2026-11-18",
+      "status": "Paid",
+      "rawClientMessage": "Hi, I need 3 logo designs and a banner, $400 total, can you send the invoice, due in 10 days. - Ravi (ravi@apexcreative.io)",
+      "notes": "Payment terms: Due in 10 days via PayPal Sandbox. Final vector SVG delivered upon receipt.",
+      "lineItems": [
+        {
+          "id": "li-1",
+          "name": "Brand Identity & Logo Concepts",
+          "quantity": 3,
+          "unitPrice": 100,
+          "total": 300
+        },
+        {
+          "id": "li-2",
+          "name": "Social Media Banner Kit",
+          "quantity": 1,
+          "unitPrice": 100,
+          "total": 100
+        }
+      ],
+      "createdAt": "2026-11-08T09:15:00.000Z",
+      "updatedAt": "2026-11-11T14:08:08.786Z",
+      "paypalInvoiceId": "INV2-M2EB-VXE6-XJZM-EY5J",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#M2EBVXE6XJZMEY5J",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-M2EB-VXE6-XJZM-EY5J",
+      "rawPayPalStatus": "PAID",
+      "payToken": "2c468e0481330de88afe89086d0db1b2"
+    },
+    {
+      "id": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "businessId": "biz-demo-001",
+      "clientName": "CloudScale Systems (Sarah Jenkins)",
+      "clientEmail": "sarah.j@cloudscale.net",
+      "description": "Full-Stack API Integration & Microservices Security Audit (40 hrs)",
+      "amount": 3200,
+      "currency": "USD",
+      "issueDate": "2026-10-22",
+      "dueDate": "2026-11-05",
+      "status": "Paid",
+      "rawClientMessage": "Please invoice for sprint 4 microservices audit 40 hrs at $80/hr. Thanks Sarah.",
+      "notes": "Overdue since November 5th. Reminder notification pending collections sequence.",
+      "lineItems": [
+        {
+          "id": "li-3",
+          "name": "Backend API Audit & Performance Profiling",
+          "quantity": 40,
+          "unitPrice": 80,
+          "total": 3200
+        }
+      ],
+      "createdAt": "2026-10-22T14:30:00.000Z",
+      "updatedAt": "2026-11-11T14:08:11.249Z",
+      "paypalInvoiceId": "INV2-9E7M-AVHJ-MJ5L-NAAV",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#9E7MAVHJMJ5LNAAV",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-9E7M-AVHJ-MJ5L-NAAV",
+      "rawPayPalStatus": "PAID",
+      "payToken": "4b3e1713e424a47a26a7cf7882d98ad0"
+    },
+    {
+      "id": "demo-overdue-1",
+      "invoiceNumber": "INV-2026-DEMO1",
+      "businessId": "biz-demo-001",
+      "clientName": "[Demo] Horizon Studio (Liam Chen)",
+      "clientEmail": "liam@horizonstudio.design",
+      "description": "Website Landing Page & Interactive Motion Graphics",
+      "amount": 650,
+      "currency": "USD",
+      "issueDate": "2026-10-23",
+      "dueDate": "2026-11-06",
+      "status": "Overdue",
+      "isDemo": true,
+      "rawClientMessage": "Hi Liam, sending over the agreed landing page work invoice ($650). Due Nov 6.",
+      "notes": "[Demo Data] 5 days overdue. Ideal for testing friendly reminder generation (1-7 days overdue).",
+      "lineItems": [
+        {
+          "id": "li-demo-1",
+          "name": "Landing Page Responsive UI",
+          "quantity": 1,
+          "unitPrice": 450,
+          "total": 450
+        },
+        {
+          "id": "li-demo-2",
+          "name": "Motion Graphics Asset Pack",
+          "quantity": 1,
+          "unitPrice": 200,
+          "total": 200
+        }
+      ],
+      "createdAt": "2026-10-23T10:00:00.000Z",
+      "updatedAt": "2026-11-07T00:00:00.000Z",
+      "payToken": "064b7e0818607c4293c48f9218a330f0"
+    },
+    {
+      "id": "demo-overdue-2",
+      "invoiceNumber": "INV-2026-DEMO2",
+      "businessId": "biz-demo-001",
+      "clientName": "[Demo] Quantum Labs (Dr. Aris Thorne)",
+      "clientEmail": "aris@quantumlabs.ai",
+      "description": "Data Pipeline Automation & Real-Time Dashboard Integration",
+      "amount": 1850,
+      "currency": "USD",
+      "issueDate": "2026-10-14",
+      "dueDate": "2026-10-28",
+      "status": "Overdue",
+      "isDemo": true,
+      "rawClientMessage": "Billing for Python telemetry pipeline and WebSocket dashboard: $1,850. Due Oct 28.",
+      "notes": "[Demo Data] 14 days overdue. Ideal for testing firmer reminder tone and client reply negotiations.",
+      "lineItems": [
+        {
+          "id": "li-demo-3",
+          "name": "ETL Pipeline & Kafka Integration",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "total": 1200
+        },
+        {
+          "id": "li-demo-4",
+          "name": "WebSocket Live Telemetry UI",
+          "quantity": 1,
+          "unitPrice": 650,
+          "total": 650
+        }
+      ],
+      "createdAt": "2026-10-14T11:30:00.000Z",
+      "updatedAt": "2026-10-29T00:00:00.000Z",
+      "payToken": "26c0bada04f36f1fb7eceb2fb17bcd24"
+    },
+    {
+      "id": "demo-overdue-3",
+      "invoiceNumber": "INV-2026-DEMO3",
+      "businessId": "biz-demo-001",
+      "clientName": "[Demo] Nexus Media Partners (Elena Rostova)",
+      "clientEmail": "billing@nexusmedia.agency",
+      "description": "Q3 Brand Strategy & Video Post-Production Campaign",
+      "amount": 3400,
+      "currency": "USD",
+      "issueDate": "2026-09-30",
+      "dueDate": "2026-10-15",
+      "status": "Overdue",
+      "isDemo": true,
+      "rawClientMessage": "Deliverable complete for video post-production retainer: $3,400. Due Oct 15.",
+      "notes": "[Demo Data] 27 days overdue. Ideal for testing final collection notice generation.",
+      "lineItems": [
+        {
+          "id": "li-demo-5",
+          "name": "Brand Campaign Video Editing",
+          "quantity": 1,
+          "unitPrice": 2200,
+          "total": 2200
+        },
+        {
+          "id": "li-demo-6",
+          "name": "Sound Design & Audio Mastering",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "total": 1200
+        }
+      ],
+      "createdAt": "2026-09-30T09:00:00.000Z",
+      "updatedAt": "2026-10-16T00:00:00.000Z",
+      "payToken": "17c1b3f923bcdff9e2896ad98f362994"
     },
     {
       "id": "inv-1004",
       "invoiceNumber": "INV-2026-004",
+      "businessId": "biz-demo-001",
       "clientName": "Vanguard Legal Tech (Marcus Vance)",
       "clientEmail": "mvance@vanguardtech.co",
       "description": "UI/UX Dashboard Prototyping & Design System in Figma",
@@ -178,23 +265,25 @@
       "dueDate": "2026-10-28",
       "status": "Paid",
       "rawClientMessage": "Marcus here from Vanguard. Send the $850 Figma prototype invoice due in two weeks.",
-      "notes": "Paid in full on October 27, 2026.",
+      "notes": "Paid in full on October 27, 2026 via PayPal Sandbox.",
       "lineItems": [
         {
           "id": "li-5",
           "name": "Figma Interactive Component Library & 10 UI Screens",
-          "description": "Dark-mode compliant attorney review workstation designs",
           "quantity": 1,
           "unitPrice": 850,
           "total": 850
         }
       ],
       "createdAt": "2026-10-14T10:00:00.000Z",
-      "updatedAt": "2026-10-27T16:20:00.000Z"
+      "updatedAt": "2026-10-27T16:20:00.000Z",
+      "rawPayPalStatus": "PAID",
+      "payToken": "a1f1719fd2530dd3f807cdebaeb22253"
     },
     {
       "id": "inv-1005",
       "invoiceNumber": "INV-2026-005",
+      "businessId": "biz-demo-001",
       "clientName": "Brightline Digital (Priya Patel)",
       "clientEmail": "priya@brightline.agency",
       "description": "Monthly Fractional Frontend Engineering Retainer (October 2026)",
@@ -209,126 +298,250 @@
         {
           "id": "li-6",
           "name": "Fractional Senior React / TypeScript Support",
-          "description": "Monthly architecture advisory, PR reviews, and critical bug fixes",
           "quantity": 1,
           "unitPrice": 2000,
           "total": 2000
         }
       ],
       "createdAt": "2026-10-01T08:00:00.000Z",
-      "updatedAt": "2026-10-30T17:45:00.000Z"
+      "updatedAt": "2026-10-30T17:45:00.000Z",
+      "rawPayPalStatus": "PAID",
+      "payToken": "f73a5fc7f9e5f21142a25ee4245c09c0"
     },
     {
-      "id": "demo-overdue-1",
-      "invoiceNumber": "INV-2026-DEMO1",
-      "clientName": "[Demo] Horizon Studio (Liam Chen)",
-      "clientEmail": "liam@horizonstudio.design",
-      "description": "Website Landing Page & Interactive Motion Graphics",
-      "amount": 650,
+      "id": "inv-1007",
+      "invoiceNumber": "INV-2026-007",
+      "businessId": "biz-demo-001",
+      "clientName": "Vertex Media Group (Maya Lin)",
+      "clientEmail": "maya@vertexmedia.io",
+      "description": "Brand Refresh & Design System Guidelines",
+      "amount": 1200,
       "currency": "USD",
-      "issueDate": "2026-10-23",
-      "dueDate": "2026-11-06",
-      "status": "Overdue",
-      "isDemo": true,
-      "rawClientMessage": "Hi Liam, sending over the agreed landing page work invoice ($650). Due Nov 6.",
-      "notes": "[Demo Data] 4 days overdue. Ideal for testing friendly reminder generation (1-7 days overdue).",
+      "issueDate": "2026-10-18",
+      "dueDate": "2026-11-01",
+      "status": "Paid",
+      "rawClientMessage": "Please send invoice for brand system guidelines ($1,200). Paid Nov 1.",
+      "notes": "Paid in full on November 1, 2026 via PayPal Sandbox.",
       "lineItems": [
         {
-          "id": "li-demo-1",
-          "name": "Landing Page Responsive UI",
-          "description": "Figma to React conversion with smooth interactions",
-          "quantity": 1,
-          "unitPrice": 450,
-          "total": 450
-        },
-        {
-          "id": "li-demo-2",
-          "name": "Motion Graphics Asset Pack",
-          "description": "Lottie animations for hero illustration",
-          "quantity": 1,
-          "unitPrice": 200,
-          "total": 200
-        }
-      ],
-      "createdAt": "2026-10-23T10:00:00.000Z",
-      "updatedAt": "2026-11-10T14:16:28.767Z",
-      "lastReminderSentAt": "2026-11-10T14:16:28.767Z",
-      "remindersCount": 1
-    },
-    {
-      "id": "demo-overdue-2",
-      "invoiceNumber": "INV-2026-DEMO2",
-      "clientName": "[Demo] Quantum Labs (Dr. Aris Thorne)",
-      "clientEmail": "aris@quantumlabs.ai",
-      "description": "Data Pipeline Automation & Real-Time Dashboard Integration",
-      "amount": 1850,
-      "currency": "USD",
-      "issueDate": "2026-10-14",
-      "dueDate": "2026-10-28",
-      "status": "Overdue",
-      "isDemo": true,
-      "rawClientMessage": "Billing for Python telemetry pipeline and WebSocket dashboard: $1,850. Due Oct 28.",
-      "notes": "[Demo Data] 13 days overdue. Ideal for testing firmer reminder tone and client reply negotiations.",
-      "lineItems": [
-        {
-          "id": "li-demo-3",
-          "name": "ETL Pipeline & Kafka Integration",
-          "description": "High-throughput stream processing setup",
-          "quantity": 1,
-          "unitPrice": 1200,
-          "total": 1200
-        },
-        {
-          "id": "li-demo-4",
-          "name": "WebSocket Live Telemetry UI",
-          "description": "Real-time charts and KPI indicators",
-          "quantity": 1,
-          "unitPrice": 650,
-          "total": 650
-        }
-      ],
-      "createdAt": "2026-10-14T11:30:00.000Z",
-      "updatedAt": "2026-11-10T14:16:46.476Z",
-      "lastReminderSentAt": "2026-11-10T14:16:46.476Z",
-      "remindersCount": 1
-    },
-    {
-      "id": "demo-overdue-3",
-      "invoiceNumber": "INV-2026-DEMO3",
-      "clientName": "[Demo] Nexus Media Partners (Elena Rostova)",
-      "clientEmail": "billing@nexusmedia.agency",
-      "description": "Q3 Brand Strategy & Video Post-Production Campaign",
-      "amount": 3400,
-      "currency": "USD",
-      "issueDate": "2026-09-30",
-      "dueDate": "2026-10-15",
-      "status": "Overdue",
-      "isDemo": true,
-      "rawClientMessage": "Deliverable complete for video post-production retainer: $3,400. Due Oct 15.",
-      "notes": "[Demo Data] 26 days overdue. Ideal for testing final collection notice generation.",
-      "lineItems": [
-        {
-          "id": "li-demo-5",
-          "name": "Brand Campaign Video Editing & Color Grading",
-          "description": "4 video cuts for YouTube and paid ads",
-          "quantity": 1,
-          "unitPrice": 2200,
-          "total": 2200
-        },
-        {
-          "id": "li-demo-6",
-          "name": "Sound Design & Audio Mastering",
-          "description": "Custom Foley and voiceover mixing in 5.1",
+          "id": "li-7",
+          "name": "Design System Guidelines Document",
           "quantity": 1,
           "unitPrice": 1200,
           "total": 1200
         }
       ],
-      "createdAt": "2026-09-30T09:00:00.000Z",
-      "updatedAt": "2026-10-16T00:00:00.000Z"
+      "createdAt": "2026-10-18T10:00:00.000Z",
+      "updatedAt": "2026-11-01T15:10:00.000Z",
+      "rawPayPalStatus": "PAID",
+      "payToken": "651cc3914004036d02cdcde62477c378"
+    },
+    {
+      "id": "inv-1008",
+      "invoiceNumber": "INV-2026-008",
+      "businessId": "biz-demo-001",
+      "clientName": "Kestrel Logistics (David Becker)",
+      "clientEmail": "dbecker@kestrellogistics.com",
+      "description": "Fleet Tracking Dashboard & Mobile App UX",
+      "amount": 2750,
+      "currency": "USD",
+      "issueDate": "2026-10-25",
+      "dueDate": "2026-11-25",
+      "status": "Draft",
+      "rawClientMessage": "Can we split the $2,750 into two payments? First half paid, second half by Nov 25.",
+      "notes": "Split payment agreed: 50% deposit received ($1,375.00). Balance due Nov 25.",
+      "lineItems": [
+        {
+          "id": "li-8",
+          "name": "Fleet Dashboard Interface Architecture",
+          "quantity": 1,
+          "unitPrice": 2750,
+          "total": 2750
+        }
+      ],
+      "createdAt": "2026-10-25T09:00:00.000Z",
+      "updatedAt": "2026-11-11T14:08:10.211Z",
+      "rawPayPalStatus": "DRAFT",
+      "paypalInvoiceId": "INV2-P539-MD25-2G7P-KT9F",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#P539MD252G7PKT9F",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-P539-MD25-2G7P-KT9F",
+      "payToken": "ea5703a4c25e9bcbbf51cd17f7354a75"
+    },
+    {
+      "id": "inv-1794209458101-0wrct",
+      "invoiceNumber": "INV-2026-006",
+      "businessId": "biz-demo-001",
+      "clientName": "TechConsult Studio (Ravi)",
+      "clientEmail": "ravi@example.com",
+      "description": "3 Logo Designs and a Banner",
+      "amount": 400,
+      "currency": "USD",
+      "issueDate": "2026-11-09",
+      "dueDate": "2026-11-19",
+      "status": "Draft",
+      "notes": "Due in 10 days. Ready for approval and PayPal Sandbox dispatch.",
+      "rawClientMessage": "Hi, I need 3 logo designs and a banner, $400 total. Please send the invoice, due in 10 days. - Ravi (ravi@example.com)",
+      "lineItems": [
+        {
+          "id": "item-1794209458101-0",
+          "name": "Logo Designs",
+          "quantity": 3,
+          "unitPrice": 100,
+          "total": 300
+        },
+        {
+          "id": "item-1794209458101-1",
+          "name": "Banner Design",
+          "quantity": 1,
+          "unitPrice": 100,
+          "total": 100
+        }
+      ],
+      "createdAt": "2026-11-09T07:30:58.101Z",
+      "updatedAt": "2026-11-11T14:08:07.815Z",
+      "paypalInvoiceId": "INV2-9N4L-G8J9-K3XG-VCRD",
+      "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#9N4LG8J9K3XGVCRD",
+      "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-9N4L-G8J9-K3XG-VCRD",
+      "rawPayPalStatus": "DRAFT",
+      "payToken": "f49859210fdeea4d69466b9f5716765e"
     }
   ],
   "activityLogs": [
+    {
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "reminder_drafted",
+      "description": "Gemini AI drafted Friendly Reminder (1–7 days overdue) for CloudScale Systems (Sarah Jenkins) ($3200.00)",
+      "metadata": {
+        "tone": "friendly",
+        "daysOverdue": 6,
+        "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due"
+      },
+      "id": "act-1794406846511-jt96m",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:20:46.511Z"
+    },
+    {
+      "action": "agent_scan",
+      "description": "Collections agent scanned 12 invoices: 3 overdue invoice(s) already have pending drafts in the approval queue.",
+      "metadata": {
+        "scannedCount": 12,
+        "overdueCount": 3,
+        "newDraftsCount": 0,
+        "alreadyDraftedCount": 3,
+        "totalPending": 4
+      },
+      "id": "act-1794406823531-tsjg9",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:20:23.531Z"
+    },
+    {
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "action": "reply_analyzed",
+      "description": "Gemini AI analyzed customer message for INV-2026-012: \"Client requested to split invoice into two installments\"",
+      "metadata": {
+        "intent": "Client requested to split invoice into two installments",
+        "sentiment": "cooperative",
+        "hasSplit": true,
+        "suggestedResponse": "Hi Sarah Jenkins Design,\n\nThank you for the update. We understand and appreciate you letting us know.\n\nWe can approve splitting Invoice INV-2026-012 ($375.00) into two payments: $187.50 due within 7 days, and the remaining $187.50 due in 21 days. Does that work for you?\n\nBest regards,\nNudgePay Accounts"
+      },
+      "id": "act-1794406820510-ecp5j",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:20:20.510Z"
+    },
+    {
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "action": "client_message",
+      "description": "Customer message received on Invoice INV-2026-012 (Sarah Jenkins Design): \"Hi! Can I pay half this Friday and the rest next month?\"",
+      "metadata": {
+        "messageId": "msg-1794406800504-153p2",
+        "fullMessage": "Hi! Can I pay half this Friday and the rest next month?",
+        "clientName": "Sarah Jenkins Design",
+        "payToken": "b7aeaff6bb6694feac4dd58a76faf514"
+      },
+      "id": "act-1794406800504-8i0dh",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:20:00.504Z"
+    },
+    {
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "paid",
+      "description": "Payment received: Invoice INV-2026-002 ($3200.00 USD) from CloudScale Systems (Sarah Jenkins) confirmed via PayPal Sandbox.",
+      "metadata": {
+        "paypalInvoiceId": "INV2-9E7M-AVHJ-MJ5L-NAAV",
+        "rawPayPalStatus": "PAID",
+        "amount": 3200
+      },
+      "id": "act-1794406091250-776la",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:11.250Z"
+    },
+    {
+      "invoiceId": "inv-1002",
+      "invoiceNumber": "INV-2026-002",
+      "action": "edited",
+      "description": "Invoice INV-2026-002 updated. Status: Paid",
+      "id": "act-1794406091249-dr05m",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:11.249Z"
+    },
+    {
+      "invoiceId": "inv-1008",
+      "invoiceNumber": "INV-2026-008",
+      "action": "status_checked",
+      "description": "PayPal Sandbox status sync: Updated from Partially paid to Draft (DRAFT)",
+      "metadata": {
+        "paypalInvoiceId": "INV2-P539-MD25-2G7P-KT9F",
+        "rawPayPalStatus": "DRAFT"
+      },
+      "id": "act-1794406090212-ezeae",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:10.212Z"
+    },
+    {
+      "invoiceId": "inv-1008",
+      "invoiceNumber": "INV-2026-008",
+      "action": "edited",
+      "description": "Invoice INV-2026-008 updated. Status: Draft",
+      "id": "act-1794406090211-9u15g",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:10.211Z"
+    },
+    {
+      "invoiceId": "inv-1008",
+      "invoiceNumber": "INV-2026-008",
+      "action": "edited",
+      "description": "Invoice INV-2026-008 updated. Status: Partially paid",
+      "id": "act-1794406089488-zz6lt",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:09.488Z"
+    },
+    {
+      "invoiceId": "inv-1003",
+      "invoiceNumber": "INV-2026-003",
+      "action": "paid",
+      "description": "Payment received: Invoice INV-2026-003 ($1450.00 USD) from Nordic Wellness Co. (Elin Larsson) confirmed via PayPal Sandbox.",
+      "metadata": {
+        "paypalInvoiceId": "INV2-ZRJW-LAF5-82KE-WCBL",
+        "rawPayPalStatus": "PAID",
+        "amount": 1450
+      },
+      "id": "act-1794406089488-gky3g",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:09.488Z"
+    },
+    {
+      "invoiceId": "inv-1003",
+      "invoiceNumber": "INV-2026-003",
+      "action": "edited",
+      "description": "Invoice INV-2026-003 updated. Status: Paid",
+      "id": "act-1794406089487-lumjn",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:09.487Z"
+    },
     {
       "invoiceId": "inv-1001",
       "invoiceNumber": "INV-2026-001",
@@ -339,485 +552,97 @@
         "rawPayPalStatus": "PAID",
         "amount": 400
       },
-      "id": "act-1794370380463-htri0",
-      "timestamp": "2026-11-11T04:13:00.463Z"
+      "id": "act-1794406088787-p1szj",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:08.787Z"
     },
     {
       "invoiceId": "inv-1001",
       "invoiceNumber": "INV-2026-001",
       "action": "edited",
       "description": "Invoice INV-2026-001 updated. Status: Paid",
-      "id": "act-1794370380462-p1akc",
-      "timestamp": "2026-11-11T04:13:00.462Z"
-    },
-    {
-      "invoiceId": "inv-1001",
-      "invoiceNumber": "INV-2026-001",
-      "action": "edited",
-      "description": "Invoice INV-2026-001 updated. Status: Draft",
-      "id": "act-1794370379804-beqow",
-      "timestamp": "2026-11-11T04:12:59.804Z"
-    },
-    {
-      "action": "agent_scan",
-      "description": "Collections agent scanned 10 invoices: drafted 4 reminder(s) for approval.",
-      "metadata": {
-        "scannedCount": 10,
-        "overdueCount": 4,
-        "newDraftsCount": 4,
-        "alreadyDraftedCount": 0,
-        "totalPending": 4
-      },
-      "id": "act-1794320220137-bktdr",
-      "timestamp": "2026-11-10T14:17:00.137Z"
-    },
-    {
-      "invoiceId": "demo-overdue-3",
-      "invoiceNumber": "INV-2026-DEMO3",
-      "action": "reminder_drafted",
-      "description": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 26,
-        "tone": "final",
-        "subject": "FINAL NOTICE: Immediate payment required for Invoice INV-2026-DEMO3 ($3400.00)",
-        "draftId": "draft-demo-overdue-3-1794320220136",
-        "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder"
-      },
-      "id": "act-1794320220137-ei7hf",
-      "timestamp": "2026-11-10T14:17:00.137Z"
-    },
-    {
-      "invoiceId": "demo-overdue-2",
-      "invoiceNumber": "INV-2026-DEMO2",
-      "action": "reminder_drafted",
-      "description": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 13,
-        "tone": "firm",
-        "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
-        "draftId": "draft-demo-overdue-2-1794320219840",
-        "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder"
-      },
-      "id": "act-1794320219841-bgylj",
-      "timestamp": "2026-11-10T14:16:59.841Z"
-    },
-    {
-      "invoiceId": "inv-1002",
-      "invoiceNumber": "INV-2026-002",
-      "action": "reminder_drafted",
-      "description": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 5,
-        "tone": "friendly",
-        "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
-        "draftId": "draft-inv-1002-1794320219528",
-        "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder"
-      },
-      "id": "act-1794320219528-qebho",
-      "timestamp": "2026-11-10T14:16:59.528Z"
-    },
-    {
-      "invoiceId": "demo-overdue-1",
-      "invoiceNumber": "INV-2026-DEMO1",
-      "action": "reminder_drafted",
-      "description": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 4,
-        "tone": "friendly",
-        "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
-        "draftId": "draft-demo-overdue-1-1794320219226",
-        "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder"
-      },
-      "id": "act-1794320219226-m622k",
-      "timestamp": "2026-11-10T14:16:59.226Z"
-    },
-    {
-      "invoiceId": "inv-1002",
-      "invoiceNumber": "INV-2026-002",
-      "action": "reminder_sent",
-      "description": "User batch-approved and sent friendly reminder for Invoice INV-2026-002 to sarah.j@cloudscale.net",
-      "metadata": {
-        "draftId": "draft-inv-1002-1794320155701",
-        "recipient": "sarah.j@cloudscale.net",
-        "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
-        "tone": "friendly",
-        "batch": true
-      },
-      "id": "act-1794320206480-z2t27",
-      "timestamp": "2026-11-10T14:16:46.480Z"
-    },
-    {
-      "invoiceId": "inv-1002",
-      "invoiceNumber": "INV-2026-002",
-      "action": "edited",
-      "description": "Invoice INV-2026-002 updated. Status: Overdue",
-      "id": "act-1794320206478-ab4na",
-      "timestamp": "2026-11-10T14:16:46.478Z"
-    },
-    {
-      "invoiceId": "demo-overdue-2",
-      "invoiceNumber": "INV-2026-DEMO2",
-      "action": "reminder_sent",
-      "description": "User batch-approved and sent firm reminder for Invoice INV-2026-DEMO2 to aris@quantumlabs.ai",
-      "metadata": {
-        "draftId": "draft-demo-overdue-2-1794320156024",
-        "recipient": "aris@quantumlabs.ai",
-        "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
-        "tone": "firm",
-        "batch": true
-      },
-      "id": "act-1794320206478-3sg03",
-      "timestamp": "2026-11-10T14:16:46.478Z"
-    },
-    {
-      "invoiceId": "demo-overdue-2",
-      "invoiceNumber": "INV-2026-DEMO2",
-      "action": "edited",
-      "description": "Invoice INV-2026-DEMO2 updated. Status: Overdue",
-      "id": "act-1794320206476-olods",
-      "timestamp": "2026-11-10T14:16:46.476Z"
-    },
-    {
-      "invoiceId": "demo-overdue-3",
-      "invoiceNumber": "INV-2026-DEMO3",
-      "action": "reminder_rejected",
-      "description": "User dismissed reminder draft for Invoice INV-2026-DEMO3 ([Demo] Nexus Media Partners (Elena Rostova))",
-      "metadata": {
-        "draftId": "draft-demo-overdue-3-1794320156330",
-        "reason": "Customer promised payment tomorrow"
-      },
-      "id": "act-1794320199857-ylt91",
-      "timestamp": "2026-11-10T14:16:39.857Z"
-    },
-    {
-      "invoiceId": "demo-overdue-1",
-      "invoiceNumber": "INV-2026-DEMO1",
-      "action": "reminder_sent",
-      "description": "User approved and sent friendly reminder for Invoice INV-2026-DEMO1 to liam@horizonstudio.design",
-      "metadata": {
-        "draftId": "draft-demo-overdue-1-1794320155435",
-        "recipient": "liam@horizonstudio.design",
-        "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
-        "tone": "friendly"
-      },
-      "id": "act-1794320188768-jvrm6",
-      "timestamp": "2026-11-10T14:16:28.768Z"
-    },
-    {
-      "invoiceId": "demo-overdue-1",
-      "invoiceNumber": "INV-2026-DEMO1",
-      "action": "edited",
-      "description": "Invoice INV-2026-DEMO1 updated. Status: Overdue",
-      "id": "act-1794320188767-g7w1p",
-      "timestamp": "2026-11-10T14:16:28.767Z"
-    },
-    {
-      "action": "agent_scan",
-      "description": "Collections agent scanned 10 invoices: 4 overdue invoice(s) already have pending drafts in the approval queue.",
-      "metadata": {
-        "scannedCount": 10,
-        "overdueCount": 4,
-        "newDraftsCount": 0,
-        "alreadyDraftedCount": 4,
-        "totalPending": 4
-      },
-      "id": "act-1794320161311-g5111",
-      "timestamp": "2026-11-10T14:16:01.311Z"
-    },
-    {
-      "action": "agent_scan",
-      "description": "Collections agent scanned 10 invoices: drafted 4 reminder(s) for approval.",
-      "metadata": {
-        "scannedCount": 10,
-        "overdueCount": 4,
-        "newDraftsCount": 4,
-        "alreadyDraftedCount": 0,
-        "totalPending": 4
-      },
-      "id": "act-1794320156331-2gp2b",
-      "timestamp": "2026-11-10T14:15:56.331Z"
-    },
-    {
-      "invoiceId": "demo-overdue-3",
-      "invoiceNumber": "INV-2026-DEMO3",
-      "action": "reminder_drafted",
-      "description": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 26,
-        "tone": "final",
-        "subject": "FINAL NOTICE: Immediate payment required for Invoice INV-2026-DEMO3 ($3400.00)",
-        "draftId": "draft-demo-overdue-3-1794320156330",
-        "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder"
-      },
-      "id": "act-1794320156331-rv106",
-      "timestamp": "2026-11-10T14:15:56.331Z"
-    },
-    {
-      "invoiceId": "demo-overdue-2",
-      "invoiceNumber": "INV-2026-DEMO2",
-      "action": "reminder_drafted",
-      "description": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 13,
-        "tone": "firm",
-        "subject": "Urgent: Overdue payment for Invoice INV-2026-DEMO2 ($1850.00)",
-        "draftId": "draft-demo-overdue-2-1794320156024",
-        "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder"
-      },
-      "id": "act-1794320156024-k7lyo",
-      "timestamp": "2026-11-10T14:15:56.024Z"
-    },
-    {
-      "invoiceId": "inv-1002",
-      "invoiceNumber": "INV-2026-002",
-      "action": "reminder_drafted",
-      "description": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 5,
-        "tone": "friendly",
-        "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
-        "draftId": "draft-inv-1002-1794320155701",
-        "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder"
-      },
-      "id": "act-1794320155702-fd59h",
-      "timestamp": "2026-11-10T14:15:55.702Z"
-    },
-    {
-      "invoiceId": "demo-overdue-1",
-      "invoiceNumber": "INV-2026-DEMO1",
-      "action": "reminder_drafted",
-      "description": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
-      "metadata": {
-        "agentRun": true,
-        "daysOverdue": 4,
-        "tone": "friendly",
-        "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
-        "draftId": "draft-demo-overdue-1-1794320155435",
-        "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder"
-      },
-      "id": "act-1794320155436-hcxxc",
-      "timestamp": "2026-11-10T14:15:55.436Z"
-    },
-    {
-      "invoiceId": "inv-1794233823387-dcv3h",
-      "invoiceNumber": "INV-2026-008",
-      "action": "deleted",
-      "description": "Invoice INV-2026-008 for Error Test Client was deleted.",
-      "id": "act-1794233826208-4zof4",
-      "timestamp": "2026-11-09T14:17:06.208Z"
-    },
-    {
-      "invoiceId": "inv-1794233823387-dcv3h",
-      "invoiceNumber": "INV-2026-008",
-      "action": "edited",
-      "description": "Invoice INV-2026-008 updated. Status: Draft",
-      "id": "act-1794233824784-5b5zc",
-      "timestamp": "2026-11-09T14:17:04.784Z"
-    },
-    {
-      "invoiceId": "inv-1794233823387-dcv3h",
-      "invoiceNumber": "INV-2026-008",
-      "action": "edited",
-      "description": "Invoice INV-2026-008 updated. Status: Draft",
-      "id": "act-1794233824104-hmtx2",
-      "timestamp": "2026-11-09T14:17:04.104Z"
-    },
-    {
-      "invoiceId": "inv-1794233823387-dcv3h",
-      "invoiceNumber": "INV-2026-008",
-      "action": "edited",
-      "description": "Invoice INV-2026-008 updated. Status: Draft",
-      "id": "act-1794233823394-sz0mj",
-      "timestamp": "2026-11-09T14:17:03.394Z"
-    },
-    {
-      "invoiceId": "inv-1794233823387-dcv3h",
-      "invoiceNumber": "INV-2026-008",
-      "action": "created",
-      "description": "Invoice INV-2026-008 created for Error Test Client ($100.00)",
-      "id": "act-1794233823387-7fi03",
-      "timestamp": "2026-11-09T14:17:03.387Z"
-    },
-    {
-      "invoiceId": "inv-1794209458101-0wrct",
-      "invoiceNumber": "INV-2026-006",
-      "action": "status_checked",
-      "description": "PayPal Sandbox status sync: Updated from Sent to Draft (DRAFT)",
-      "metadata": {
-        "paypalInvoiceId": "INV2-9N4L-G8J9-K3XG-VCRD",
-        "rawPayPalStatus": "DRAFT"
-      },
-      "id": "act-1794233803270-358mg",
-      "timestamp": "2026-11-09T14:16:43.270Z"
+      "id": "act-1794406088786-4x9c3",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:08.786Z"
     },
     {
       "invoiceId": "inv-1794209458101-0wrct",
       "invoiceNumber": "INV-2026-006",
       "action": "edited",
       "description": "Invoice INV-2026-006 updated. Status: Draft",
-      "id": "act-1794233803269-nfazn",
-      "timestamp": "2026-11-09T14:16:43.269Z"
+      "id": "act-1794406087816-c3i76",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:07.816Z"
     },
     {
       "invoiceId": "inv-1794209458101-0wrct",
       "invoiceNumber": "INV-2026-006",
       "action": "edited",
-      "description": "Invoice INV-2026-006 updated. Status: Sent",
-      "id": "act-1794233801915-06zgv",
-      "timestamp": "2026-11-09T14:16:41.915Z"
+      "description": "Invoice INV-2026-006 updated. Status: Draft",
+      "id": "act-1794406086977-igm14",
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:08:06.977Z"
     },
     {
-      "invoiceId": "inv-1794230860486-55kpj",
-      "invoiceNumber": "INV-2026-012",
-      "action": "edited",
-      "description": "Invoice INV-2026-012 updated. Status: Sent",
-      "id": "act-1794233801914-9f0i2",
-      "timestamp": "2026-11-09T14:16:41.914Z"
-    },
-    {
-      "invoiceId": "inv-1794230860486-55kpj",
-      "invoiceNumber": "INV-2026-012",
-      "action": "sent",
-      "description": "Dispatched live via PayPal Sandbox API. Invoice ID: INV2-QAC8-RQG6-E2DC-ZG6Q (Invoice: INV-2026-012)",
-      "metadata": {
-        "paypalInvoiceId": "INV2-QAC8-RQG6-E2DC-ZG6Q",
-        "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#QAC8RQG6E2DCZG6Q",
-        "paypalSellerLink": "https://www.sandbox.paypal.com/invoice/details/INV2-QAC8-RQG6-E2DC-ZG6Q",
-        "isSimulated": false
-      },
-      "id": "act-1794230866258-b4e5p",
-      "timestamp": "2026-11-09T13:27:46.258Z"
-    },
-    {
-      "invoiceId": "inv-1794230860486-55kpj",
-      "invoiceNumber": "INV-2026-012",
-      "action": "edited",
-      "description": "Invoice INV-2026-012 updated. Status: Sent",
-      "id": "act-1794230866258-9tret",
-      "timestamp": "2026-11-09T13:27:46.258Z"
-    },
-    {
-      "invoiceId": "inv-1794230860486-55kpj",
-      "invoiceNumber": "INV-2026-007",
-      "action": "approved",
-      "description": "User approved invoice INV-2026-007 for $375.00 to Sarah Jenkins Design",
-      "id": "act-1794230860507-4xi9v",
-      "timestamp": "2026-11-09T13:27:40.507Z"
-    },
-    {
-      "invoiceId": "inv-1794230860486-55kpj",
-      "invoiceNumber": "INV-2026-007",
-      "action": "created",
-      "description": "Invoice INV-2026-007 created for Sarah Jenkins Design ($375.00)",
-      "id": "act-1794230860486-zg3f4",
-      "timestamp": "2026-11-09T13:27:40.486Z"
-    },
-    {
-      "invoiceId": "inv-1794209458101-0wrct",
-      "invoiceNumber": "INV-2026-006",
-      "action": "sent",
-      "description": "Dispatched live via PayPal Sandbox API. Invoice ID: undefined",
-      "metadata": {
-        "paypalPaymentLink": "https://www.sandbox.paypal.com/invoice/p/#undefined",
-        "isSimulated": false
-      },
-      "id": "act-1794209460101-v05bs",
-      "timestamp": "2026-11-09T07:31:00.101Z"
-    },
-    {
-      "invoiceId": "inv-1794209458101-0wrct",
-      "invoiceNumber": "INV-2026-006",
-      "action": "edited",
-      "description": "Invoice INV-2026-006 updated. Status: Sent",
-      "id": "act-1794209460100-isb8o",
-      "timestamp": "2026-11-09T07:31:00.100Z"
-    },
-    {
-      "invoiceId": "inv-1794209458101-0wrct",
-      "invoiceNumber": "INV-2026-006",
-      "action": "approved",
-      "description": "User approved invoice INV-2026-006 for $400.00 to Ravi",
-      "id": "act-1794209458174-79hk7",
-      "timestamp": "2026-11-09T07:30:58.174Z"
-    },
-    {
-      "invoiceId": "inv-1794209458101-0wrct",
-      "invoiceNumber": "INV-2026-006",
-      "action": "created",
-      "description": "Invoice INV-2026-006 created for Ravi ($400.00)",
-      "id": "act-1794209458101-s3a9s",
-      "timestamp": "2026-11-09T07:30:58.101Z"
-    },
-    {
-      "id": "act-1",
-      "invoiceId": "inv-1001",
-      "invoiceNumber": "INV-2026-001",
-      "action": "created",
-      "description": "Draft invoice extracted from Ravi Sharma message via Gemini AI",
-      "timestamp": "2026-11-08T09:15:00.000Z"
-    },
-    {
-      "id": "act-2",
-      "invoiceId": "inv-1003",
-      "invoiceNumber": "INV-2026-003",
-      "action": "created",
-      "description": "Extracted invoice from client email message via Gemini AI",
-      "timestamp": "2026-11-02T11:00:00.000Z"
-    },
-    {
-      "id": "act-3",
-      "invoiceId": "inv-1003",
-      "invoiceNumber": "INV-2026-003",
-      "action": "approved",
-      "description": "User reviewed and approved invoice details for $1,450.00",
-      "timestamp": "2026-11-02T11:04:30.000Z"
-    },
-    {
-      "id": "act-4",
-      "invoiceId": "inv-1003",
-      "invoiceNumber": "INV-2026-003",
-      "action": "sent",
-      "description": "Dispatched invoice via PayPal Invoicing API Sandbox (ID: INV2-NW-3319-SANDBOX)",
-      "timestamp": "2026-11-02T11:05:00.000Z"
-    },
-    {
-      "id": "act-5",
-      "invoiceId": "inv-1002",
-      "invoiceNumber": "INV-2026-002",
-      "action": "sent",
-      "description": "Invoice dispatched to sarah.j@cloudscale.net via PayPal Sandbox",
-      "timestamp": "2026-10-22T14:35:00.000Z"
-    },
-    {
-      "id": "act-6",
-      "invoiceId": "inv-1002",
-      "invoiceNumber": "INV-2026-002",
-      "action": "status_checked",
-      "description": "Invoice due date (2026-11-05) lapsed without payment; marked as Overdue",
-      "timestamp": "2026-11-06T00:00:00.000Z"
-    },
-    {
-      "id": "act-7",
-      "invoiceId": "inv-1004",
-      "invoiceNumber": "INV-2026-004",
-      "action": "paid",
-      "description": "Payment of $850.00 confirmed on PayPal Sandbox for Marcus Vance",
-      "timestamp": "2026-10-27T16:20:00.000Z"
-    },
-    {
-      "id": "act-8",
+      "id": "act-demo-1",
+      "businessId": "biz-demo-001",
       "invoiceId": "inv-1005",
       "invoiceNumber": "INV-2026-005",
       "action": "paid",
-      "description": "Payment of $2,000.00 received for October Retainer",
+      "description": "Payment of $2,000.00 USD confirmed from Brightline Digital (Priya Patel)",
       "timestamp": "2026-10-30T17:45:00.000Z"
+    },
+    {
+      "id": "act-demo-2",
+      "businessId": "biz-demo-001",
+      "invoiceId": "inv-1004",
+      "invoiceNumber": "INV-2026-004",
+      "action": "paid",
+      "description": "Payment of $850.00 USD confirmed from Vanguard Legal Tech via PayPal Sandbox",
+      "timestamp": "2026-10-27T16:20:00.000Z"
+    },
+    {
+      "id": "act-demo-3",
+      "businessId": "biz-demo-001",
+      "invoiceId": "inv-1007",
+      "invoiceNumber": "INV-2026-007",
+      "action": "paid",
+      "description": "Payment of $1,200.00 USD received from Vertex Media Group (Maya Lin)",
+      "timestamp": "2026-11-01T15:10:00.000Z"
+    },
+    {
+      "id": "act-demo-4",
+      "businessId": "biz-demo-001",
+      "invoiceId": "inv-1008",
+      "invoiceNumber": "INV-2026-008",
+      "action": "terms_updated",
+      "description": "User approved new terms for INV-2026-008: Extended due date to 2026-11-25, Split into 2 installments",
+      "timestamp": "2026-11-05T12:00:00.000Z"
+    },
+    {
+      "id": "act-demo-5",
+      "businessId": "biz-demo-001",
+      "invoiceId": "inv-1003",
+      "invoiceNumber": "INV-2026-003",
+      "action": "sent",
+      "description": "Invoice approved and dispatched to Nordic Wellness Co. via PayPal Sandbox API",
+      "timestamp": "2026-11-02T11:05:00.000Z"
+    },
+    {
+      "id": "act-demo-6",
+      "businessId": "biz-demo-001",
+      "invoiceId": "inv-1794230860486-55kpj",
+      "invoiceNumber": "INV-2026-012",
+      "action": "sent",
+      "description": "Dispatched live via PayPal Sandbox API. Invoice ID: INV2-QAC8-RQG6-E2DC-ZG6Q",
+      "timestamp": "2026-11-09T14:16:41.000Z"
+    },
+    {
+      "id": "act-demo-7",
+      "businessId": "biz-demo-001",
+      "action": "agent_scan",
+      "description": "Collections agent scanned 12 invoices: found 4 overdue invoices requiring action.",
+      "timestamp": "2026-11-10T14:00:00.000Z"
     }
   ],
   "approvalQueue": [
@@ -838,7 +663,8 @@
       "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO3",
       "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
       "status": "pending",
-      "createdAt": "2026-11-10T14:17:00.136Z"
+      "createdAt": "2026-11-10T14:17:00.136Z",
+      "businessId": "biz-demo-001"
     },
     {
       "id": "draft-demo-overdue-2-1794320219840",
@@ -857,7 +683,8 @@
       "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO2",
       "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
       "status": "pending",
-      "createdAt": "2026-11-10T14:16:59.840Z"
+      "createdAt": "2026-11-10T14:16:59.840Z",
+      "businessId": "biz-demo-001"
     },
     {
       "id": "draft-inv-1002-1794320219528",
@@ -872,11 +699,12 @@
       "tone": "friendly",
       "toneLabel": "Friendly Reminder (1–7 days overdue)",
       "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
-      "body": "Hi CloudScale Systems (Sarah Jenkins),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-002 for $3200.00 was due on 2026-11-05 (5 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026002\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "body": "Hi CloudScale Systems (Sarah Jenkins),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-002 for $3200.00 was due on 2026-11-05 (5 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026002\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nNudgePay Accounts",
       "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026002",
       "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
       "status": "pending",
-      "createdAt": "2026-11-10T14:16:59.528Z"
+      "createdAt": "2026-11-10T14:16:59.528Z",
+      "businessId": "biz-demo-001"
     },
     {
       "id": "draft-demo-overdue-1-1794320219226",
@@ -891,11 +719,12 @@
       "tone": "friendly",
       "toneLabel": "Friendly Reminder (1–7 days overdue)",
       "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
-      "body": "Hi [Demo] Horizon Studio (Liam Chen),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-DEMO1 for $650.00 was due on 2026-11-06 (4 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "body": "Hi [Demo] Horizon Studio (Liam Chen),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-DEMO1 for $650.00 was due on 2026-11-06 (4 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nNudgePay Accounts",
       "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1",
       "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
       "status": "pending",
-      "createdAt": "2026-11-10T14:16:59.226Z"
+      "createdAt": "2026-11-10T14:16:59.226Z",
+      "businessId": "biz-demo-001"
     },
     {
       "id": "draft-demo-overdue-3-1794320156330",
@@ -915,7 +744,8 @@
       "reasoning": "Invoice for Elena Rostova is 26 days overdue, drafted a final reminder",
       "status": "rejected",
       "createdAt": "2026-11-10T14:15:56.330Z",
-      "reviewedAt": "2026-11-10T14:16:39.856Z"
+      "reviewedAt": "2026-11-10T14:16:39.856Z",
+      "businessId": "biz-demo-001"
     },
     {
       "id": "draft-demo-overdue-2-1794320156024",
@@ -935,7 +765,8 @@
       "reasoning": "Invoice for Dr. Aris Thorne is 13 days overdue, drafted a firm reminder",
       "status": "approved",
       "createdAt": "2026-11-10T14:15:56.024Z",
-      "reviewedAt": "2026-11-10T14:16:46.476Z"
+      "reviewedAt": "2026-11-10T14:16:46.476Z",
+      "businessId": "biz-demo-001"
     },
     {
       "id": "draft-inv-1002-1794320155701",
@@ -950,12 +781,13 @@
       "tone": "friendly",
       "toneLabel": "Friendly Reminder (1–7 days overdue)",
       "subject": "Friendly reminder: Invoice INV-2026-002 ($3200.00) is past due",
-      "body": "Hi CloudScale Systems (Sarah Jenkins),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-002 for $3200.00 was due on 2026-11-05 (5 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026002\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "body": "Hi CloudScale Systems (Sarah Jenkins),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-002 for $3200.00 was due on 2026-11-05 (5 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026002\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nNudgePay Accounts",
       "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026002",
       "reasoning": "Invoice for Sarah Jenkins is 5 days overdue, drafted a friendly reminder",
       "status": "approved",
       "createdAt": "2026-11-10T14:15:55.701Z",
-      "reviewedAt": "2026-11-10T14:16:46.476Z"
+      "reviewedAt": "2026-11-10T14:16:46.476Z",
+      "businessId": "biz-demo-001"
     },
     {
       "id": "draft-demo-overdue-1-1794320155435",
@@ -970,12 +802,90 @@
       "tone": "friendly",
       "toneLabel": "Friendly Reminder (1–7 days overdue)",
       "subject": "Friendly reminder: Invoice INV-2026-DEMO1 ($650.00) is past due",
-      "body": "Hi [Demo] Horizon Studio (Liam Chen),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-DEMO1 for $650.00 was due on 2026-11-06 (4 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nInvoicePilot Accounts",
+      "body": "Hi [Demo] Horizon Studio (Liam Chen),\n\nHope you're having a productive week! Just a friendly reminder that Invoice INV-2026-DEMO1 for $650.00 was due on 2026-11-06 (4 days ago).\n\nIf you've already sent payment, please disregard this note. Otherwise, you can easily pay online via PayPal here:\nhttps://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1\n\nLet me know if you have any questions or need another copy of the invoice.\n\nBest regards,\nNudgePay Accounts",
       "paymentLink": "https://www.sandbox.paypal.com/invoice/p/#INV2026DEMO1",
       "reasoning": "Invoice for Liam Chen is 4 days overdue, drafted a friendly reminder",
       "status": "approved",
       "createdAt": "2026-11-10T14:15:55.435Z",
-      "reviewedAt": "2026-11-10T14:16:28.767Z"
+      "reviewedAt": "2026-11-10T14:16:28.767Z",
+      "businessId": "biz-demo-001"
     }
-  ]
+  ],
+  "businesses": [
+    {
+      "id": "biz-1794404532542-b6uo6",
+      "email": "acme@consulting.com",
+      "businessName": "Acme Strategy Group",
+      "passwordSalt": "17edb8e324154b62cf4d3f74321b1da1",
+      "passwordHash": "6d79fb9565c2f5b46698d1a02455d9774452dba79e1c7fcedb58007a9981864c9a1a2e6bcb099699b4cb446cfcae0b128e26d3fd12d7ee21d9fa6431ac86101f",
+      "createdAt": "2026-11-11T13:42:12.542Z"
+    },
+    {
+      "id": "biz-demo-001",
+      "email": "demo@example.com",
+      "businessName": "Apex Creative Studio",
+      "passwordSalt": "bdb3f9fad9a9d7420c3287c2a3704651",
+      "passwordHash": "bdf987cd6b0b9f41f5d51fb8ccb08048cf6d9e57df37499f67f163cc794774d4a6d13b50aaaaf81d8cbeaf0c2c937f872876dc27acfb9bad35f21271b36a51c0",
+      "createdAt": "2026-11-01T00:00:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "demo-session-token-2026",
+      "businessId": "biz-demo-001",
+      "createdAt": "2026-11-01T00:00:00.000Z",
+      "expiresAt": "2099-01-01T00:00:00.000Z"
+    },
+    {
+      "token": "e9adf11eede327ccd5881afdc88cef16ab1fb5dde13171f11f22cc497b46f49f",
+      "businessId": "biz-demo-001",
+      "createdAt": "2026-11-11T13:41:49.830Z",
+      "expiresAt": "2026-12-11T13:41:49.830Z"
+    },
+    {
+      "token": "72a83b5a377704ad470df8b27f8eae68b10591e0fed461a23797275836ccfce8",
+      "businessId": "biz-1794404532542-b6uo6",
+      "createdAt": "2026-11-11T13:42:12.544Z",
+      "expiresAt": "2026-12-11T13:42:12.544Z"
+    }
+  ],
+  "lastAgentRuns": {
+    "biz-demo-001": {
+      "businessId": "biz-demo-001",
+      "timestamp": "2026-11-11T14:20:23.531Z",
+      "overdueCount": 3,
+      "draftsCreatedCount": 0,
+      "scannedCount": 12,
+      "draftsReasoning": [
+        {
+          "clientName": "[Demo] Nexus Media Partners (Elena Rostova)",
+          "invoiceNumber": "INV-2026-DEMO3",
+          "daysOverdue": 26,
+          "tone": "final",
+          "line": "Elena: 26 days overdue, final tone"
+        },
+        {
+          "clientName": "[Demo] Quantum Labs (Dr. Aris Thorne)",
+          "invoiceNumber": "INV-2026-DEMO2",
+          "daysOverdue": 13,
+          "tone": "firm",
+          "line": "Aris: 13 days overdue, firm tone"
+        },
+        {
+          "clientName": "CloudScale Systems (Sarah Jenkins)",
+          "invoiceNumber": "INV-2026-002",
+          "daysOverdue": 5,
+          "tone": "friendly",
+          "line": "Sarah: 5 days overdue, friendly tone"
+        },
+        {
+          "clientName": "[Demo] Horizon Studio (Liam Chen)",
+          "invoiceNumber": "INV-2026-DEMO1",
+          "daysOverdue": 4,
+          "tone": "friendly",
+          "line": "Liam: 4 days overdue, friendly tone"
+        }
+      ]
+    }
+  }
 }

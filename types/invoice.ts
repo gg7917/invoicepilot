@@ -1,6 +1,25 @@
 /**
- * Types for InvoicePilot
+ * Types for NudgePay
  */
+
+export interface BusinessUser {
+  id: string;
+  email: string;
+  businessName: string;
+  createdAt: string;
+}
+
+export interface BusinessUserRecord extends BusinessUser {
+  passwordSalt: string;
+  passwordHash: string;
+}
+
+export interface SessionRecord {
+  token: string;
+  businessId: string;
+  createdAt: string;
+  expiresAt: string;
+}
 
 export type InvoiceStatus =
   | 'Draft'
@@ -22,6 +41,7 @@ export interface LineItem {
 
 export interface ActivityLogEntry {
   id: string;
+  businessId?: string;
   invoiceId?: string;
   invoiceNumber?: string;
   action:
@@ -37,7 +57,8 @@ export interface ActivityLogEntry {
     | 'reminder_rejected'
     | 'reply_analyzed'
     | 'terms_updated'
-    | 'agent_scan';
+    | 'agent_scan'
+    | 'client_message';
   description: string;
   timestamp: string; // ISO string
   metadata?: Record<string, any>;
@@ -45,6 +66,8 @@ export interface ActivityLogEntry {
 
 export interface Invoice {
   id: string;
+  businessId?: string;
+  payToken?: string;          // Random unguessable customer payment link token (/pay/<token>)
   invoiceNumber: string;
   clientName: string;
   clientEmail: string;
@@ -61,6 +84,12 @@ export interface Invoice {
   rawPayPalStatus?: string;   // Exact status returned by PayPal Sandbox (e.g. PAID, SENT, UNPAID, MARKED_AS_PAID)
   lastSyncError?: string;     // If PayPal Sandbox call failed, store the error description
   rawClientMessage?: string;
+  clientMessages?: Array<{
+    id: string;
+    message: string;
+    timestamp: string;
+    sender: 'client' | 'business';
+  }>;
   notes?: string;
   isDemo?: boolean;           // Clearly marks demo/sample data
   lastReminderSentAt?: string;
@@ -73,6 +102,29 @@ export interface Invoice {
   }>;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PublicInvoiceData {
+  payToken: string;
+  businessName: string;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail?: string;
+  description: string;
+  lineItems: LineItem[];
+  amount: number;
+  currency: 'USD';
+  issueDate: string;
+  dueDate: string;
+  status: InvoiceStatus;
+  paypalPaymentLink?: string;
+  notes?: string;
+  clientMessages?: Array<{
+    id: string;
+    message: string;
+    timestamp: string;
+    sender: 'client' | 'business';
+  }>;
 }
 
 export interface ReminderDraft {
@@ -92,6 +144,7 @@ export interface ReminderDraft {
 
 export interface ApprovalDraft {
   id: string;
+  businessId?: string;
   invoiceId: string;
   invoiceNumber: string;
   clientName: string;
@@ -120,6 +173,7 @@ export interface DraftReasoningLine {
 }
 
 export interface LastAgentRunSummary {
+  businessId?: string;
   timestamp: string;
   overdueCount: number;
   draftsCreatedCount: number;

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { authFetch } from "../lib/api";
+import React, { useState, useEffect } from 'react';
 import {
   X,
   MessageSquare,
@@ -40,6 +41,22 @@ export const ClientReplyModal: React.FC<ClientReplyModalProps> = ({
   const [isApplying, setIsApplying] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    if (invoice && isOpen) {
+      const latestMsg =
+        invoice.clientMessages && invoice.clientMessages.length > 0
+          ? [...invoice.clientMessages].reverse().find((m) => m.sender === 'client')?.message
+          : invoice.rawClientMessage;
+      if (latestMsg) {
+        setReplyText(latestMsg);
+      } else {
+        setReplyText('');
+      }
+      setAnalysis(null);
+      setError(null);
+    }
+  }, [invoice, isOpen]);
+
   if (!isOpen || !invoice) return null;
 
   const handleAnalyze = async () => {
@@ -48,7 +65,7 @@ export const ClientReplyModal: React.FC<ClientReplyModalProps> = ({
     setError(null);
 
     try {
-      const res = await fetch(`/api/invoices/${invoice.id}/analyze-reply`, {
+      const res = await authFetch(`/api/invoices/${invoice.id}/analyze-reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ replyText }),
@@ -100,7 +117,7 @@ export const ClientReplyModal: React.FC<ClientReplyModalProps> = ({
       }
       payload.notesAppendix = `Client replied: "${replyText.substring(0, 100)}..."`;
 
-      const res = await fetch(`/api/invoices/${invoice.id}/apply-reply-terms`, {
+      const res = await authFetch(`/api/invoices/${invoice.id}/apply-reply-terms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

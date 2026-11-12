@@ -28,7 +28,7 @@ export const PayPalGuideModal: React.FC<PayPalGuideModalProps> = ({
                 PayPal Sandbox Configuration
               </h3>
               <p className="text-xs text-slate-500">
-                Live sandbox credentials setup for InvoicePilot
+                Live sandbox credentials setup for NudgePay
               </p>
             </div>
           </div>
@@ -115,7 +115,7 @@ export const PayPalGuideModal: React.FC<PayPalGuideModalProps> = ({
                       Create or select a Sandbox REST App
                     </p>
                     <p className="text-xs text-slate-500">
-                      Click <strong>Create App</strong>, name it <em>InvoicePilot</em>, and copy the{' '}
+                      Click <strong>Create App</strong>, name it <em>NudgePay</em>, and copy the{' '}
                       <strong>Client ID</strong> and <strong>Secret</strong>.
                     </p>
                   </div>
@@ -150,7 +150,7 @@ export const PayPalGuideModal: React.FC<PayPalGuideModalProps> = ({
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 flex items-center space-x-2">
             <Key className="w-4 h-4 text-slate-400 shrink-0" />
             <span>
-              InvoicePilot strictly executes PayPal calls on the backend. Your keys are never exposed
+              NudgePay strictly executes PayPal calls on the backend. Your keys are never exposed
               to the browser.
             </span>
           </div>

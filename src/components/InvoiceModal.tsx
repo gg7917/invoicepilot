@@ -13,6 +13,9 @@ import {
   History,
   MessageSquare,
   Split,
+  Link2,
+  Check,
+  Copy,
 } from 'lucide-react';
 import { Invoice, ActivityLogEntry } from '../../types/invoice';
 
@@ -37,7 +40,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   onDraftReminder,
   onClientReply,
 }) => {
+  const [copiedLink, setCopiedLink] = React.useState(false);
+
   if (!isOpen || !invoice) return null;
+
+  const handleCopyCustomerLink = () => {
+    if (!invoice) return;
+    const token = invoice.payToken || invoice.id;
+    const url = `${window.location.origin}/pay/${token}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   const getStatusBadge = (status: Invoice['status']) => {
     switch (status) {
@@ -260,7 +274,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 rounded-lg shadow-2xs transition-colors shrink-0"
                 >
-                  Pay now (client view)
+                  Client PayPal link
                   <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
                 </a>
               ) : (
@@ -439,6 +453,26 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               >
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                 Mark as Paid
+              </button>
+            )}
+
+            {invoice.status !== 'Draft' && (
+              <button
+                onClick={handleCopyCustomerLink}
+                className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-semibold shadow-2xs transition-colors flex items-center"
+                title="Copy unguessable customer payment link"
+              >
+                {copiedLink ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
+                    <span>Copied Link!</span>
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
+                    <span>Copy Customer Link</span>
+                  </>
+                )}
               </button>
             )}
           </div>

@@ -1,3 +1,4 @@
+import { authFetch } from "../lib/api";
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
@@ -68,7 +69,7 @@ export const AskMoneyChat: React.FC<AskMoneyChatProps> = ({
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/chat/ask-money', {
+      const res = await authFetch('/api/chat/ask-money', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question }),
